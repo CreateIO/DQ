@@ -1,0 +1,23 @@
+{
+  "name": "createDQ",
+  "version": "0.0.8",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "body-parser": "*",
+    "error-handler": "^1.0.0",
+    "express": "*",
+    "express-json": "^1.0.0",
+    "express-session": "^1.11.1",
+    "favicon": "0.0.2",
+    "jade": "*",
+    "json": "^9.0.3",
+    "method-override": "^2.3.2",
+    "morgan": "^1.5.2",
+    "pg": "^4.3.0",
+    "router": "^1.0.0",
+    "serve-favicon": "^2.2.0"
+  }
+}

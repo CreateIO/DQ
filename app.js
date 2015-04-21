@@ -1,0 +1,53 @@
+
+/**
+ * Module dependencies.
+ */
+
+var express = require('express');
+var routes = require('./routes');
+var user = require('./routes/user');
+var http = require('http');
+var path = require('path');
+
+var app = express();
+
+var bodyParser = require('body-parser'),
+    favicon = require('serve-favicon'),
+    logger = require('morgan'),
+    json = require('express-json'),
+    methodOverride = require('method-override'),
+    //errorHandler = require('error-handler'),
+    pg = require('pg')
+
+// all environments
+app.set('port', process.env.PORT || 3000);
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+app.use(favicon('public/images/favicon-96x96.png'));
+app.use(logger('dev'));
+app.use(json());
+app.use(bodyParser.urlencoded());
+app.use(methodOverride());
+// express 3.x syntax
+//app.use(app.router);
+app.use(express.static(path.join(__dirname, 'public')));
+
+// development only
+//if ('development' == app.get('env')) {
+//  app.use(errorHandler());
+//}
+
+app.get('/', routes.index);
+app.get('/users', user.list);
+//app.get('/tag', tag.find);
+
+http.createServer(app).listen(app.get('port'), function(){
+  console.log('Express server listening on port ' + app.get('port'));
+});
+
+
+function errorHandler(err, req, res, next) {
+  res.status(500);
+  res.render('error', { error: err });
+}
+
