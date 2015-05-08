@@ -17,6 +17,7 @@ sudo mkdir DQ
 sudo chown ubuntu DQ
 cd DQ
 git clone https://www.github.com/CreateIO/DQ
+git clone https://www.github.com/CreateIO/DQMatchSets
 cd DQ
 sudo apt-get install npm
 sudo apt-get install node
