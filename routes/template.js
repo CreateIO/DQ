@@ -32,6 +32,8 @@ exports.fetch = function(req, res){
   console.log("   requested resource: " + resource );
 
   var resourceFile = '../DQMatchSets/template/' + resource + '.json';
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
   fs.readFile(resourceFile, 'utf8', function(err,data) {
     if (err) {
         // report error since could not find resource file
