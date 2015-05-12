@@ -28,7 +28,9 @@ app.set('view engine', 'jade');
 app.use(favicon('public/images/favicon-96x96.png'));
 app.use(logger('dev'));
 app.use(json());
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 app.use(methodOverride());
 // express 3.x syntax
 //app.use(app.router);
