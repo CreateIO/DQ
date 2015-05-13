@@ -50,13 +50,13 @@ exports.fetch = function(req, res){
 //            console.log(results);
            return res.json(results);
         });
+        
+        query.on('error', function(error) {
+          //handle the error
+            console.log(error);
+            res.status(404).send('Unable to read from DQ database');
+        });
       }
-
-    query.on('error', function(error) {
-      //handle the error
-        console.log(error);
-        res.status(404).send('Unable to read from DQ database');
-    });
 
     pg.end();
   });
