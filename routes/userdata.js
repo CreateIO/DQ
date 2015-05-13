@@ -20,7 +20,7 @@ exports.fetch = function(req, res){
     user: 'DQAdmin',
     password: 'lEtmEinplEasE!',
     database: 'DQ',
-    host: 'localhost',
+//    host: 'localhost',
     host: 'dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com',
     port: 5432
   };
