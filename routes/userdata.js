@@ -7,9 +7,9 @@ var router = express.Router();
  *  SELECT data for a specified userdata/propertyID/region/ID
  */
 exports.fetch = function(req, res){
-  console.log("Running fetch for specified userdata:");
   var propertyID = req.query.propertyID;
   var version = req.query.version;
+  console.log("Running userdata fetch for specified propertyID: " + propertyID);
   console.log(req.query);
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';

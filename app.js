@@ -5,7 +5,7 @@
 
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
+var docURL = require('./routes/docURL');
 var template = require('./routes/template');
 var userdata = require('./routes/userdata');
 var http = require('http');
@@ -45,6 +45,7 @@ app.get('/', routes.index);
 //app.get('/users', user.list);
 //app.get('/tag', tag.find);
 app.get('/DQ/template', template.fetch);
+app.get('/DQ/docURL', docURL.fetch );
 app.get('/DQ/userdata', userdata.fetch);
 
 http.createServer(app).listen(app.get('port'), function(){
