@@ -100,14 +100,14 @@ exports.fetch = function(req, res){
                   });
                 }
              }
+             // if make it here, are NULL for assets
              return res.json(results);
-//           client.end();
         });
 
         query.on('error', function(error) {
           //handle the error
             console.log(error);
-            res.status(404).send('Unable to read from DQ database');
+            return res.status(404).send('Unable to read from DQ database');
         });
       }
 
