@@ -1,7 +1,25 @@
 var express     = require('express');
 var pg          = require('pg');
+var knoxCopy = require('knox-copy');
 
 var router = express.Router();
+
+getFilesFromS3 = function(folderName) {
+  var fullName = 'phillyvi-test-2/assets/imagesets-/' + folderName
+  var client = knoxCopy.createClient({
+    key: 'AKIAI2NVER2KEZ67CZFQ',
+    secret: '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',
+    bucket: 'io.create'
+  });
+
+  client.streamKeys({
+    // omit the prefix to list the whole bucket
+    prefix: fullName
+  }).on('data', function(key) {
+    console.log(key);
+  });
+
+}
 
 /*
  *  SELECT data for a specified userdata/propertyID/region/ID
@@ -12,9 +30,10 @@ exports.fetch = function(req, res){
   var version = req.query.version;
   console.log("Running docURL fetch for specified propertyID: " + propertyID);
   console.log(req.query);
+  res.setHeader("Access-Control-Allow-Origin", "*");
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
-  var selectString = "SELECT property_id,wdceppage FROM wdcep_retail where property_id = '" + propertyID + "';";
+  var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";;
   var results = [];
   var rows = 0;
   var connectionDef = {
@@ -46,7 +65,12 @@ exports.fetch = function(req, res){
         query.on('end', function() {
             client.end();
             console.log('Read ' + rows)
-//            console.log(results);
+            console.log(results);
+            for (var ii in results) {
+                var folder = results[ii].assets;
+                console.log('  Located assets: ' + folder );
+                getFilesFromS3(folder);
+            }
            return res.json(results);
         });
 

@@ -11,9 +11,10 @@ exports.fetch = function(req, res){
   var version = req.query.version;
   console.log("Running userdata fetch for specified propertyID: " + propertyID);
   console.log(req.query);
+  res.setHeader("Access-Control-Allow-Origin", "*");
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
-  var selectString = "SELECT * FROM wdcep_retail where property_id = '" + propertyID + "';";
+  var selectString = "SELECT * FROM wdcep_retail WHERE property_id = '" + propertyID + "' AND marketable = 'TRUE'";
   var results = [];
   var rows = 0;
   var connectionDef = {
