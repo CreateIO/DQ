@@ -1,7 +1,10 @@
-var express     = require('express'),
-    fs          = require('fs');;
+var express     = require('express');
+var fs          = require('fs');
+//       var http = require('http');
+var AWS = require('aws-sdk');
 
 var router = express.Router();
+var s3base = "http://s3.amazonaws.com/io.create/phillyvi-test-2/dqmatchsets/template/"
 
 function findVersion (currentVersion, templateJSON ) {
     var objectVersion = "0.0.0";
@@ -31,9 +34,28 @@ exports.fetch = function(req, res){
   console.log(req.query);
   console.log("   requested resource: " + resource );
 
-  var resourceFile = '../DQMatchSets/template/' + resource + '.json';
   res.setHeader("Access-Control-Allow-Origin", "*");
 
+//  var resourceFile = s3base + resource + '.json';
+
+//  var s3 = new AWS.Se();
+
+/*
+  http.get(resourceFile)
+  .success(function (data) {
+    var jsonData = JSON.parse(data);
+    console.log(jsonData);
+    var resultObject = findVersion(version, jsonData.versions);
+//    console.log(resultObject);
+    res.send(resultObject);
+  })
+  .error(function (data, status) {
+    console.log('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
+    res.status(404).send('Resource not found: ' + resourceFile);
+  })
+*/
+  var resourceFile = '../DQMatchSets/template/' + resource + '.json';
+  console.log("   file URL: " + resourceFile );
   fs.readFile(resourceFile, 'utf8', function(err,data) {
     if (err) {
         // report error since could not find resource file

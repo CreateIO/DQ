@@ -19,7 +19,7 @@ var bodyParser = require('body-parser'),
     json = require('express-json'),
     methodOverride = require('method-override'),
     //errorHandler = require('error-handler'),
-    pg = require('pg')
+    pg = require('pg');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
