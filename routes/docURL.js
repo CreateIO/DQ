@@ -72,10 +72,11 @@ exports.fetch = function(req, res){
         query.on('end', function() {
             console.log('Read ' + rows)
             console.log(results);
-
+            var gotData = false;
             for (var ii in results) {
                 var folder = results[ii].assets;
                 if (folder != '') {
+                  gotData = true;
                   console.log('  Located assets: ' + folder );
                   var fullName = 'phillyvi-test-2/assets/imagesets-/' + folder;
                   var client = knoxCopy.createClient({
@@ -96,18 +97,22 @@ exports.fetch = function(req, res){
                   }).on('end', function() {
                     console.log(files);
                     results[ii].fileNames = files;
+                    pg.end();
                     return res.json(results);
                   });
                 }
              }
-             // if make it here, are NULL for assets
-             return res.json(results);
+             if (!gotData) {
+               // if make it here, are NULL for assets
+               pg.end();
+               return res.json(results);
+             }
         });
 
         query.on('error', function(error) {
           //handle the error
             console.log(error);
-            return res.status(404).send('Unable to read from DQ database');
+            res.status(404).send('Unable to read from DQ database');
         });
       }
 
