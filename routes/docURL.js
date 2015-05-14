@@ -43,6 +43,7 @@ exports.fetch = function(req, res){
   var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";;
   var results = [];
   var rows = 0;
+  var fileCount = 0;
   var connectionDef = {
     user: 'DQAdmin',
     password: 'lEtmEinplEasE!',
@@ -55,8 +56,10 @@ exports.fetch = function(req, res){
 
     pg.connect(connectionDef, function(err, client, done) {
       if(err) {
+        done();
+        pg.end()
         console.log(err);
-        res.status(404).send('Unable to connect to DQ database');
+        return res.json([{"status":"Error: Unable to connect to DQ database", "count":0, "fileNames":[]}]);
       }
       else {
         // SQL Query > Select Data
@@ -70,7 +73,7 @@ exports.fetch = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            console.log('Read ' + rows)
+            console.log('Read ' + rows + ' rows');
             console.log(results);
             var gotData = false;
             for (var ii in results) {
@@ -91,33 +94,38 @@ exports.fetch = function(req, res){
                   }).on('data', function(key) {
                     if (key.slice(-3) == type)
                     {
-                        console.log(key);
+//                        console.log(key);
                         files.push(key);
+                        fileCount++;
                     }
                   }).on('end', function() {
                     console.log(files);
                     results[ii].fileNames = files;
+                    results[ii].status = "success";
+                    results[ii].count = fileCount;
+                    done();
                     pg.end();
                     return res.json(results);
                   });
                 }
              }
              if (!gotData) {
-               // if make it here, are NULL for assets
+               // if make it here, no assets found
+               done();
                pg.end();
-               return res.json(results);
+               return res.json([{"status":"success", "count":0, "fileNames":[]}]);
              }
         });
 
         query.on('error', function(error) {
           //handle the error
-            console.log(error);
-            res.status(404).send('Unable to read from DQ database');
+          console.log(error);
+          done();
+          pg.end();
+          return res.json([{"status":"Error reading from DQ database", "count":0, "fileNames":[]}]);
         });
       }
-
-    pg.end();
-  });
+   });
 
 };
 
