@@ -18,11 +18,10 @@ exports.fetch = function(req, res){
   var results = [];
   var rows = 0;
   var connectionDef = {
-    user: 'DQAdmin',
-    password: 'lEtmEinplEasE!',
-    database: 'DQ',
-//    host: 'localhost',
-    host: 'dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com',
+    user: process.env.PG_USER,
+    password: process.env.PG_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
     port: 5432
   };
 //    var connectionString = '//DQAdmin:lEtmEinplEasE!@dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com/DQ'
@@ -31,7 +30,9 @@ exports.fetch = function(req, res){
     pg.connect(connectionDef, function(err, client, done) {
       if(err) {
         console.log(err);
-        res.status(404).send('Unable to connect to DQ database');
+        done();
+        pg.end();
+        return res.status(404).send('Unable to connect to DQ database');
       }
       else {
         // SQL Query > Select Data
@@ -48,18 +49,22 @@ exports.fetch = function(req, res){
             client.end();
             console.log('Read ' + rows)
 //            console.log(results);
+           done();
+           pg.end();
            return res.json(results);
         });
 
         query.on('error', function(error) {
           //handle the error
             console.log(error);
-            res.status(404).send('Unable to read from DQ database');
+            done();
+            pg.end();
+            return res.status(404).send('Unable to read from DQ database');
         });
 
       }
 
-    pg.end();
+//    pg.end();
   });
 
 };

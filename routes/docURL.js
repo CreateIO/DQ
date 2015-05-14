@@ -45,10 +45,10 @@ exports.fetch = function(req, res){
   var rows = 0;
   var fileCount = 0;
   var connectionDef = {
-    user: 'DQAdmin',
-    password: 'lEtmEinplEasE!',
-    database: 'DQ',
-    host: 'dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com',
+    user: process.env.PG_USER,
+    password: process.env.PG_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
     port: 5432
   };
 //    var connectionString = '//DQAdmin:lEtmEinplEasE!@dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com/DQ'
@@ -83,9 +83,9 @@ exports.fetch = function(req, res){
                   console.log('  Located assets: ' + folder );
                   var fullName = 'phillyvi-test-2/assets/imagesets-/' + folder;
                   var client = knoxCopy.createClient({
-                    key: 'AKIAI2NVER2KEZ67CZFQ',
-                    secret: '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',
-                    bucket: 'io.create'
+                    key: process.env.KC_KEY,
+                    secret: process.env.KC_SECRET,
+                    bucket: process.env.S3_BUCKET
                   });
                   var files = [];
                   client.streamKeys({

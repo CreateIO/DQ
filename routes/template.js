@@ -4,7 +4,6 @@ var fs          = require('fs');
 var AWS = require('aws-sdk');
 
 var router = express.Router();
-var s3base = "http://s3.amazonaws.com/io.create/phillyvi-test-2/dqmatchsets/template/"
 
 function findVersion (currentVersion, templateJSON ) {
     var objectVersion = "0.0.0";
@@ -38,22 +37,34 @@ exports.fetch = function(req, res){
 
 //  var resourceFile = s3base + resource + '.json';
 
-//  var s3 = new AWS.Se();
+/*
+ * This code reads template file from remote s3 repository
+ */
+//  var s3base = "http://s3.amazonaws.com/io.create/phillyvi-test-2/dqmatchsets/template/";
+  var resourceFile = 'phillyvi-test-2/dqmatchsets/template/' + resource + '.json'
+  var s3 = new AWS.S3();
+  var params = {Bucket: process.env.S3_BUCKET, Key: resourceFile };
+  var s3file = s3.getObject(params, function(err, data) {
+    if (err) {
+        // report error since could not find resource file
+        console.log('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
+        res.status(404).send('Resource not found: ' + resourceFile);
+    }
+    else {
+        // return json object that corresponds to best version available within resource file
+        var jsonData = JSON.parse(data.Body);
+        console.log(jsonData);
+        var resultObject = findVersion(version, jsonData.versions);
+    //    console.log(resultObject);
+        res.send(resultObject);
+    }
+
+  });
+
 
 /*
-  http.get(resourceFile)
-  .success(function (data) {
-    var jsonData = JSON.parse(data);
-    console.log(jsonData);
-    var resultObject = findVersion(version, jsonData.versions);
-//    console.log(resultObject);
-    res.send(resultObject);
-  })
-  .error(function (data, status) {
-    console.log('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
-    res.status(404).send('Resource not found: ' + resourceFile);
-  })
-*/
+ * This code reads template file from local storage
+ *
   var resourceFile = '../DQMatchSets/template/' + resource + '.json';
   console.log("   file URL: " + resourceFile );
   fs.readFile(resourceFile, 'utf8', function(err,data) {
@@ -71,6 +82,6 @@ exports.fetch = function(req, res){
         res.send(resultObject);
     }
   });
-
+*/
 };
 
