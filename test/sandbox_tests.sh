@@ -16,7 +16,8 @@
 set -eou pipefail
 IFS=$'\n\t'
 
-trex_host=${1:-localhost:8080}
+dq_host=${1:-localhost:3000}
+dq_proto=${2:-http}
 
 show_header() {
     printf "code\\ttotal_s\\tdl_speed\\tdl_size\\turl_effective\\n"
@@ -29,23 +30,15 @@ mkdir -p target/test
 cd target/test
 show_header
 
-do_curl "http://${trex_host}/version" test_version.js
-
-do_curl "http://${trex_host}/properties/kml?BBOX=-77.07143261485601,38.91516754658354,-77.06798901513987,38.91654235728794"  test_properties.kml
-do_curl "http://${trex_host}/properties/czml?BBOX=-77.07143261485601,38.91516754658354,-77.06798901513987,38.91654235728794"  test_properties.czml
-do_curl "http://${trex_host}/properties/json?BBOX=-77.07143261485601,38.91516754658354,-77.06798901513987,38.91654235728794"  test_properties.json
-do_curl "http://${trex_host}/properties/geojson?BBOX=-77.07143261485601,38.91516754658354,-77.06798901513987,38.91654235728794"  test_properties.geojson
-do_curl "http://${trex_host}/properties/geojson?BBOX=-77.0048233214098,38.8853159103428,-77.0048233214098,38.8853159103428"  test_properties_multiple_point.geojson
-do_curl "http://${trex_host}/properties/geojson?BBOX=-77.0049233214098,38.8852159103428,-77.0047233214098,38.8854159103428"  test_properties_multiple_box.geojson
+do_curl "${dq_proto}://${dq_host}/version" test_version.js
 
 
-do_curl "http://${trex_host}/properties/geojson?BBOX=-77.07143261485601,38.91516754658354,-77.06798901513987,38.91654235728794&lotSize=GE%201350%20&%20lotSize=LE%201399"  test_properties_filter.geojson
+do_curl "${dq_proto}://${dq_host}/DQ" test_root.json
+do_curl "${dq_proto}://${dq_host}/DQ/" test_root_dir.json
 
-#java.lang.NumberFormatException: For input string: "1500,LE"
-# this should fail always
-#do_curl "http://${trex_host}/properties/summary?lotSize=GE%201350%20&%20lotSize=LE%201500&lotSize=GE%201350%20&%20lotSize=LE%201500"  test_properties_filter_2.geojson
-do_curl "http://${trex_host}/property?x=-77.06883995218747&y=38.91567415971246"  test_property_xy.json
-do_curl "http://${trex_host}/property?id=115046"  test_property_id.json
+do_curl "${dq_proto}://${dq_host}/DQ/template" test_template_generic.json
+do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-" test_tabs_generic_novers.json
+do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0" test_tabs_generic.json
 
 
 
