@@ -7,17 +7,21 @@
 #
 #
 # example:
-#   ./sandbox_tests.sh philly-t-rex.herokuapp.com
-#   ./sandbox_tests.sh philly-t-rex-dev.herokuapp.com:80
-#   ./sandbox_tests.sh philly-t-rex-demo.herokuapp.com:80
+#   ./test/sandbox_tests.sh dq-test.create.io https
+#   ./test/sandbox_tests.sh localhost
+#   ./tests/andbox_tests.sh 
 #
-# Defaults to localhost:8080
+# Defaults to localhost:3000
 # Use unofficial bash strict mode: http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -eou pipefail
 IFS=$'\n\t'
 
 dq_host=${1:-localhost:3000}
 dq_proto=${2:-http}
+
+get_hostname() {
+    echo "$1" | sed -e 's/:/_/g' -e 's/\/.*$//'
+}
 
 show_header() {
     printf "code\\ttotal_s\\tdl_speed\\tdl_size\\turl_effective\\n"
@@ -26,8 +30,12 @@ do_curl () {
     curl -sL -w "%{http_code}\\t%{time_total}\\t%{speed_download}\\t%{size_download}\\t%{url_effective}\\n" "$1" -o "$2"
 }
 
-mkdir -p target/test
-cd target/test
+
+bindir=`dirnname $0`
+cd ${bindir}
+svrname=`get_hostname ${dq_host}`
+mkdir -p test/target/${svrname}
+cd test/target/${svrname}
 show_header
 
 do_curl "${dq_proto}://${dq_host}/version" test_version.js
