@@ -31,7 +31,7 @@ do_curl () {
 }
 
 
-bindir=`dirnname $0`
+bindir=`dirname $0`
 cd ${bindir}
 svrname=`get_hostname ${dq_host}`
 mkdir -p test/target/${svrname}
@@ -47,6 +47,21 @@ do_curl "${dq_proto}://${dq_host}/DQ/" test_root_dir.json
 do_curl "${dq_proto}://${dq_host}/DQ/template" test_template_generic.json
 do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-" test_tabs_generic_novers.json
 do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0" test_tabs_generic.json
+
+do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0" test_tabs_generic.json
+
+do_curl "${dq_proto}://${dq_host}/DQ/docURL/?version=1.0.0" test_docurl_generic.json
+
+do_curl "${dq_proto}://${dq_host}/DQ/docURL?propertyID=102613&version=1.0.0" test_docurl_single.json
+do_curl "${dq_proto}://${dq_host}//DQ/docURL?propertyID=102613&version=1.0.0" test_docurl_url_test1.json
+
+
+do_curl "${dq_proto}://${dq_host}/DQ/docURL?propertyID=131292&version=1.0.0" test_docurl_double.json
+
+do_curl "${dq_proto}://${dq_host}/DQ/docURL?parcelID=3434&version=1.0.0" test_docurl_single_parcelid.json
+
+do_curl "${dq_proto}://${dq_host}/DQ/docURL/imageSet-?version=1.0.0" test_imageset_generic.json
+
 
 
 
