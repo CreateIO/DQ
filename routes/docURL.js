@@ -108,7 +108,7 @@ exports.fetch = function(req, res){
         // if here, have completed all rows (sites) returned from DB
         if (rows == 0){
             // if here, had no results, return empty set
-            results.push({"filenames":[], "status":"success", "count":0});       // set that have success and empty returned set in case nothing returned...
+            results.push({"fileNames":[], "status":"success", "count":0});       // set that have success and empty returned set in case nothing returned...
          }
         done();
         pg.end();
