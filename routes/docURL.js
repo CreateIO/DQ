@@ -34,6 +34,7 @@ getFilesFromS3 = function(folderName, type) {
 exports.fetch = function(req, res){
   // this function called after have accumulated all possible site results
   var propertyID = req.query.propertyID;
+  res.setHeader("Access-Control-Allow-Origin", "*");
   if (!propertyID){
     return res.json([{"fileNames":[], "status":"success", "count":0}]);
   }
@@ -41,7 +42,6 @@ exports.fetch = function(req, res){
   var type = req.query.type;
   console.log("Running docURL fetch for specified propertyID: " + propertyID);
   console.log(req.query);
-  res.setHeader("Access-Control-Allow-Origin", "*");
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
   var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";;
@@ -151,6 +151,7 @@ exports.fetch = function(req, res){
  */
 exports.fetchAll = function(req, res){
   // this function called after have accumulated all possible site results
+  res.setHeader("Access-Control-Allow-Origin", "*");
   var propertyIdBin = req.query.propertyIdBin;
   if (!propertyIdBin){
     return res.json([{"status":"Error no propertyIdBin specified", "count":0, "fileNames":[]}]);
@@ -159,7 +160,6 @@ exports.fetchAll = function(req, res){
   var type = req.query.type;
   console.log("Running docURL fetchAll for collection of propertyIDs: " + propertyIdBin);
   console.log(req.query);
-  res.setHeader("Access-Control-Allow-Origin", "*");
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
   var results = [];
