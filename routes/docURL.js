@@ -35,7 +35,7 @@ exports.fetch = function(req, res){
   // this function called after have accumulated all possible site results
   var propertyID = req.query.propertyID;
   if (!propertyID){
-    return res.json([{"status":"Error no propertyID specified", "count":0, "fileNames":[]}]);
+    return res.json([{"fileNames":[], "status":"success", "count":0}]);
   }
   var version = req.query.version;
   var type = req.query.type;
@@ -178,7 +178,7 @@ exports.fetchAll = function(req, res){
       done();
       pg.end()
       console.log(err);
-      return res.json([{"status":"Error: Unable to connect to DQ database", "count":0, "fileNames":[]}]);
+      return res.json([{"fileNames":[], "status":"success", "count":0}]);
     }
 
     // retrieve files for the given row that retreived from DB
