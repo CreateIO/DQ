@@ -46,6 +46,7 @@ app.get('/', routes.index);
 //app.get('/tag', tag.find);
 app.get('/DQ/template', template.fetch);
 app.get('/DQ/docURL', docURL.fetch );
+app.get('/DQ/docCollection', docURL.fetchAll );
 app.get('/DQ/userdata', userdata.fetch);
 
 http.createServer(app).listen(app.get('port'), function(){

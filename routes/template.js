@@ -1,7 +1,8 @@
 var express     = require('express');
-var fs          = require('fs');
-//       var http = require('http');
-var AWS = require('aws-sdk');
+//var fs          = require('fs');
+//var http        = require('http');
+var AWS         = require('aws-sdk');
+//var Github = require('github-api');
 
 var router = express.Router();
 
@@ -35,11 +36,40 @@ exports.fetch = function(req, res){
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-//  var resourceFile = s3base + resource + '.json';
+/*
+ * This code reads template file from a github repository for a specific branch or tag
+ *
+//  var s3base = "http://s3.amazonaws.com/io.create/phillyvi-test-2/dqmatchsets/template/";
+    var github = new Github({
+      username: "YOU_USER",
+      password: "YOUR_PASSWORD",
+      auth: "basic"
+    });
+  var resourceFile = 'phillyvi-test-2/dqmatchsets/template/' + resource + '.json'
+  var params = {Bucket: process.env.S3_BUCKET, Key: resourceFile };
+  var s3file = s3.getObject(params, function(err, data) {
+    if (err) {
+        // report error since could not find resource file
+        console.log('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
+        res.status(404).send('Resource not found: ' + resourceFile);
+    }
+    else {
+        // return json object that corresponds to best version available within resource file
+        var jsonData = JSON.parse(data.Body);
+        console.log(jsonData);
+        var resultObject = findVersion(version, jsonData.versions);
+    //    console.log(resultObject);
+        res.send(resultObject);
+    }
+
+  });
+*/
+
 
 /*
  * This code reads template file from remote s3 repository
  */
+
 //  var s3base = "http://s3.amazonaws.com/io.create/phillyvi-test-2/dqmatchsets/template/";
   var resourceFile = 'phillyvi-test-2/dqmatchsets/template/' + resource + '.json'
   var s3 = new AWS.S3();
@@ -60,7 +90,6 @@ exports.fetch = function(req, res){
     }
 
   });
-
 
 /*
  * This code reads template file from local storage
