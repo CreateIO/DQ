@@ -119,7 +119,7 @@ exports.fetch = function(req, res){
   var cacheFlag = req.query.cache || 'true';
   console.log(req.query);
   console.log("   requested resource: " + resource );
-  console.log("   cache flag: " + cacheFlag);
+//  console.log("   cache flag: " + cacheFlag);
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
