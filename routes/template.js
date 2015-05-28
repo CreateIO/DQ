@@ -116,9 +116,10 @@ exports.fetch = function(req, res){
   console.log("Running fetch for specified template:");
   var resource = req.query.resource;
   var version = req.query.version;
-  var cacheFlag = req.query.cache;
+  var cacheFlag = req.query.cache || 'true';
   console.log(req.query);
   console.log("   requested resource: " + resource );
+  console.log("   cache flag: " + cacheFlag);
 
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -127,7 +128,7 @@ exports.fetch = function(req, res){
  */
   var resourceFile = '../' + process.env.LOCAL_CACHE + '/template/' + resource + '.json';
   console.log("   file URL: " + resourceFile );
-  if (!cacheFlag) {
+  if (cacheFlag == 'true') {
       fs.readFile(resourceFile, 'utf8', function(err,data) {
         if (err || data.length < 1) {
             // try github since file not available in local cache
