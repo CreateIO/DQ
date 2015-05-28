@@ -97,13 +97,19 @@ function readFromGitHub( res, resource, version )
     }
     else {
         // return json object that corresponds to best version available within resource file
-        var jsonData = JSON.parse(data);
-//        console.log(jsonData);
-        var resultObject = findVersion(version, jsonData.versions);
-        res.send(resultObject);
+        try {
+            var jsonData = JSON.parse(data);
+            //console.log(jsonData);
+            var resultObject = findVersion(version, jsonData.versions);
+            res.send(resultObject);
 
-        // now that have data, cache it locally!
-        writeToLocalCache( resource, data );
+            // now that have data, cache it locally!
+            writeToLocalCache( resource, data );
+        }
+        catch(e) {
+            console.log(e);
+            res.status(404).send('Error parsing JSON for resource: ' + resourceFile + " Error: " + e);
+       }
     }
 
   });
@@ -136,6 +142,7 @@ exports.fetch = function(req, res){
         }
         else {
             // return json object that corresponds to best version available within resource file
+            // NOTE: since this is cached, we know that the JSON.parse will never throw an error here
             var jsonData = JSON.parse(data);
 //            console.log(jsonData);
             var resultObject = findVersion(version, jsonData.versions);
