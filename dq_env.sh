@@ -16,7 +16,8 @@ export AWS_SECRET_ACCESS_KEY="nfSpB6sSRb3SPcXn4avYz9hW2kIwy8TBtSORVmrx"
 export AWS_REGION="us-east-1"
 
 #s3 buckets
-export S3_BUCKET="io.create"
+export S3_ASSET_BUCKET="create.assets"
+export S3_ASSET_FOLDER="regional_assets"
 
 #Github
 export GITHUB_OWNER="CreateIO"
