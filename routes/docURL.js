@@ -5,8 +5,8 @@ var knoxCopy = require('knox-copy');
 var router = express.Router();
 
 /*
-    This function takes the fips code for the region and forms the pathname from that needed to access
-    the assets for that region...
+ *  This function takes the fips code for the region and forms the pathname from that needed to access
+ *  the assets for that region...
 */
 formRegionFolderName = function(fips_code) {
   if (fips_code == 'null') {
