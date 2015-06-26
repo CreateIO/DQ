@@ -3,8 +3,14 @@ var fs          = require('fs');
 //var http        = require('http');
 //var AWS         = require('aws-sdk');
 var Github = require('github-api');
+var mkdirp = require('mkdirp');
 
 var router = express.Router();
+
+/*
+    Sample CURL to get to git using API:
+    curl -i -uBreighton:password "https://api.github.com/repos/CreateIO/DQMatchSets/contents/US11001/template/tabsNEW-.json?ref=test-regions"
+*/
 
 /*
  *  This function finds the version in the template that is less than or equal to the requested version
@@ -51,24 +57,19 @@ function writeToLocalCache( resource, fips_code, contents )
   var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + fips_code + '/template/' + resource + '.json';
   var fd = fs.open(resourceFile, 'w', function( err, fd ) {
       if (err){
-        console.log('   Unable to open file for writing; attepting to create template directory...');
         var regionFolder = '../' + process.env.LOCAL_CACHE  + '/' + fips_code;
+        var moreFolders = resource.split("/");  // any more folders?
         var templateFolder = regionFolder + '/template';
-        fs.exists( regionFolder, function(exists) {
-            if (!exists) {
-                // if here, must create new region folder before create template folder!
-                fs.mkdir(regionFolder, function(err) {
-                    if (err) {
-                        console.log('   Unable to create region directory: ' + regionFolder)
-                        return;
-                    }
-                });
-            }
-        });
-        fs.mkdir(templateFolder, function(err) {
+        console.log(moreFolders);
+        for(var ii=0; ii<moreFolders.length-1; ii++) {
+            // iterate through any additional folders that are passed in as part of the resource spec
+            // Note: we iterate one less than split since we don't want actual file
+            templateFolder = templateFolder + '/' + moreFolders[ii];
+        }
+        console.log('   Unable to open file for writing; attepting to create template directory: ' + templateFolder);
+        mkdirp(templateFolder, function (err) {
             if (err) {
-                console.log('   Unable to create template directory: ' + templateFolder)
-                return;
+                console.error('    Error creating folder for template: ' + err);
             }
             else {
               // now have the folder created, lets try opening the file again
