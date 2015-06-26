@@ -38,16 +38,13 @@ mkdir -p test/target/${svrname}
 cd test/target/${svrname}
 show_header
 
-do_curl "${dq_proto}://${dq_host}/version" test_version.js
+# we skip these basic root test -- they aren't hooked up
+#do_curl "${dq_proto}://${dq_host}/version" test_version.js
+#do_curl "${dq_proto}://${dq_host}/DQ" test_root.json
+#do_curl "${dq_proto}://${dq_host}/DQ/" test_root_dir.json
+#do_curl "${dq_proto}://${dq_host}/DQ/template" test_template_generic.json
 
-
-do_curl "${dq_proto}://${dq_host}/DQ" test_root.json
-do_curl "${dq_proto}://${dq_host}/DQ/" test_root_dir.json
-
-do_curl "${dq_proto}://${dq_host}/DQ/template" test_template_generic.json
 do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-" test_tabs_generic_novers.json
-do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0" test_tabs_generic.json
-
 do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0" test_tabs_generic.json
 
 do_curl "${dq_proto}://${dq_host}/DQ/docURL/?version=1.0.0" test_docurl_generic.json

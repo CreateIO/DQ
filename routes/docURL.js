@@ -3,30 +3,25 @@ var pg          = require('pg');
 var knoxCopy = require('knox-copy');
 
 var router = express.Router();
+
 /*
-getFilesFromS3 = function(folderName, type) {
-  var fullName = 'phillyvi-test-2/assets/imagesets-/' + folderName
-  var client = knoxCopy.createClient({
-    key: 'AKIAI2NVER2KEZ67CZFQ',
-    secret: '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',
-    bucket: 'io.create'
-  });
-
-  var results = [];
-  client.streamKeys({
-    // omit the prefix to list the whole bucket
-    prefix: fullName
-  }).on('data', function(key) {
-    if (key.slice(-3) == type)
-    {
-        console.log(key);
-        results.push(key);
-    }
-  });
- return results;
-
-}
+ *  This function takes the fips code for the region and forms the pathname from that needed to access
+ *  the assets for that region...
 */
+formRegionFolderName = function(fips_code) {
+  if (fips_code == 'null') {
+    console.log('Using default US11001 for region');
+    fips_code = 'US11001';  // in case don't supply fips_code, default to Washington DC
+  }
+  var fips_country = fips_code.substring(0,1);
+  var fips_state = fips_code.substring(2,3);
+  var fips_county = fips_code.substring(4,6);
+  var fullName = process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/state/' + fips_state + '/county/' + fips_county;
+
+ return fullName;
+
+};
+
 /*
  *  SELECT data for a specified userdata/propertyID/region/ID
  *      then return the URL to the assets for this propertyID
@@ -40,7 +35,8 @@ exports.fetch = function(req, res){
   }
   var version = req.query.version;
   var type = req.query.type;
-  console.log("Running docURL fetch for specified propertyID: " + propertyID);
+  var fips_code = req.query.region || 'US11001';
+  console.log("Running docURL fetch for specified propertyID: " + propertyID + " in region " + fips_code);
   console.log(req.query);
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
@@ -74,11 +70,11 @@ exports.fetch = function(req, res){
         var fileCount = 0;
         if (folder != '') {
           console.log('  Located assets: ' + folder );
-          var fullName = 'phillyvi-test-2/assets/imagesets-/' + folder;
+          var fullName = formRegionFolderName(fips_code) + '/imagesets-/' + folder;
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
             secret: process.env.KC_SECRET,
-            bucket: process.env.S3_BUCKET
+            bucket: process.env.S3_ASSET_BUCKET
           });
           client.streamKeys({
             // omit the prefix to list the whole bucket
@@ -158,7 +154,8 @@ exports.fetchAll = function(req, res){
   }
   var version = req.query.version;
   var type = req.query.type;
-  console.log("Running docURL fetchAll for collection of propertyIDs: " + propertyIdBin);
+  var fips_code = req.query.region || 'US11001';
+  console.log("Running docURL fetchAll for collection of propertyID: " + propertyIdBin + " in region " + fips_code);
   console.log(req.query);
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
@@ -191,11 +188,11 @@ exports.fetchAll = function(req, res){
         var fileCount = 0;
         if (folder != '') {
           console.log('  Located assets: ' + folder );
-          var fullName = 'phillyvi-test-2/assets/imagesets-/' + folder;
+          var fullName = formRegionFolderName(fips_code) + '/imagesets-/' + folder;
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
             secret: process.env.KC_SECRET,
-            bucket: process.env.S3_BUCKET
+            bucket: process.env.S3_ASSET_BUCKET
           });
           client.streamKeys({
             // omit the prefix to list the whole bucket

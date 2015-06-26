@@ -8,6 +8,8 @@ var routes = require('./routes');
 var docURL = require('./routes/docURL');
 var template = require('./routes/template');
 var userdata = require('./routes/userdata');
+var region = require('./routes/region');
+
 var http = require('http');
 var path = require('path');
 
@@ -48,6 +50,9 @@ app.get('/DQ/template', template.fetch);
 app.get('/DQ/docURL', docURL.fetch );
 app.get('/DQ/docCollection', docURL.fetchAll );
 app.get('/DQ/userdata', userdata.fetch);
+app.get('/DQ/regiondata', region.fetch);
+app.get('/DQ/region', region.find);
+app.get('/DQ/nearbyregions', region.adjacent);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

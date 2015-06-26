@@ -3,9 +3,18 @@ var fs          = require('fs');
 //var http        = require('http');
 //var AWS         = require('aws-sdk');
 var Github = require('github-api');
+var mkdirp = require('mkdirp');
 
 var router = express.Router();
 
+/*
+    Sample CURL to get to git using API:
+    curl -i -uBreighton:password "https://api.github.com/repos/CreateIO/DQMatchSets/contents/US11001/template/tabsNEW-.json?ref=test-regions"
+*/
+
+/*
+ *  This function finds the version in the template that is less than or equal to the requested version
+*/
 function findVersion (currentVersion, templateJSON ) {
     var objectVersion = "0.0.0";
     var objectResult = templateJSON[0].template;    // grab first (oldest) version in template
@@ -27,7 +36,6 @@ function findVersion (currentVersion, templateJSON ) {
 /*
  * This code writes a file to local FS
  */
-
 function writeToCache( fs, fd, resourceFile, contents )
 {
    console.log('   writing file to local cache: ' + resourceFile );
@@ -44,17 +52,24 @@ function writeToCache( fs, fd, resourceFile, contents )
    });
 }
 
-function writeToLocalCache( resource, contents )
+function writeToLocalCache( resource, fips_code, contents )
 {
-  var resourceFile = '../' + process.env.LOCAL_CACHE + '/template/' + resource + '.json';
+  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + fips_code + '/template/' + resource + '.json';
   var fd = fs.open(resourceFile, 'w', function( err, fd ) {
       if (err){
-        var templateFolder = '../' + process.env.LOCAL_CACHE + '/template';
-        console.log('   Unable to open file for writing; attepting to create template directory...');
-        fs.mkdir(templateFolder, function(err) {
+        var regionFolder = '../' + process.env.LOCAL_CACHE  + '/' + fips_code;
+        var moreFolders = resource.split("/");  // any more folders?
+        var templateFolder = regionFolder + '/template';
+        console.log(moreFolders);
+        for(var ii=0; ii<moreFolders.length-1; ii++) {
+            // iterate through any additional folders that are passed in as part of the resource spec
+            // Note: we iterate one less than split since we don't want actual file
+            templateFolder = templateFolder + '/' + moreFolders[ii];
+        }
+        console.log('   Unable to open file for writing; attepting to create template directory: ' + templateFolder);
+        mkdirp(templateFolder, function (err) {
             if (err) {
-                console.log('   Unable to create template directory: ' + templateFolder)
-                return;
+                console.error('    Error creating folder for template: ' + err);
             }
             else {
               // now have the folder created, lets try opening the file again
@@ -78,7 +93,7 @@ function writeToLocalCache( resource, contents )
 /*
  * This code reads template file from a github repository for a specific branch or tag
  */
-function readFromGitHub( res, resource, version )
+function readFromGitHub( res, resource, fips_code, version )
 {
   // Note: we get github values (user, token, repo, branch) from global environment specified in dq_env.sh
   var github = new Github({
@@ -86,7 +101,7 @@ function readFromGitHub( res, resource, version )
     auth: "oauth"
   });
   var repo = github.getRepo(process.env.GITHUB_OWNER, process.env.GITHUB_TEMPLATE_REPO);
-  var resourceFile = 'template/' + resource + '.json';
+  var resourceFile = fips_code + '/template/' + resource + '.json';
 
   console.log('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + process.env.GITHUB_TEMPLATE_BRANCH);
   repo.read(process.env.GITHUB_TEMPLATE_BRANCH, resourceFile, function(err, data) {
@@ -104,7 +119,7 @@ function readFromGitHub( res, resource, version )
             res.send(resultObject);
 
             // now that have data, cache it locally!
-            writeToLocalCache( resource, data );
+            writeToLocalCache( resource, fips_code, data );
         }
         catch(e) {
             console.log(e);
@@ -122,6 +137,7 @@ exports.fetch = function(req, res){
   console.log("Running fetch for specified template:");
   var resource = req.query.resource;
   var version = req.query.version;
+  var fips_code = req.query.region || 'US11001';
   var cacheFlag = req.query.cache || 'true';
   console.log(req.query);
   console.log("   requested resource: " + resource );
@@ -132,13 +148,13 @@ exports.fetch = function(req, res){
 /*
  * Read file from local cache if using cache
  */
-  var resourceFile = '../' + process.env.LOCAL_CACHE + '/template/' + resource + '.json';
+  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + fips_code + '/template/' + resource + '.json';
   console.log("   file URL: " + resourceFile );
   if (cacheFlag == 'true') {
       fs.readFile(resourceFile, 'utf8', function(err,data) {
         if (err || data.length < 1) {
             // try github since file not available in local cache
-            readFromGitHub( res, resource, version );
+            readFromGitHub( res, resource, fips_code, version );
         }
         else {
             // return json object that corresponds to best version available within resource file
@@ -154,7 +170,7 @@ exports.fetch = function(req, res){
   else {
     // if here, don't want cached result (for dev and testing purposes)
     // go grab github file directly
-    readFromGitHub( res, resource, version );
+    readFromGitHub( res, resource, fips_code, version );
   }
 
 /*

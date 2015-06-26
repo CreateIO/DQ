@@ -16,14 +16,15 @@ export AWS_SECRET_ACCESS_KEY="nfSpB6sSRb3SPcXn4avYz9hW2kIwy8TBtSORVmrx"
 export AWS_REGION="us-east-1"
 
 #s3 buckets
-export S3_BUCKET="io.create"
+export S3_ASSET_BUCKET="create.assets"
+export S3_ASSET_FOLDER="regional_assets"
 
 #Github
 export GITHUB_OWNER="CreateIO"
 export GITHUB_USER="DiaryQueenRo"
 export GITHUB_TOKEN="4be9d6ff845e754b967169d0ffc8ccd6a641c87f"
 export GITHUB_TEMPLATE_REPO="DQMatchSets"
-export GITHUB_TEMPLATE_BRANCH="master"
+export GITHUB_TEMPLATE_BRANCH="test-regions"
 
 #Local cache
 export LOCAL_CACHE="DQMatchSetsLocal"
