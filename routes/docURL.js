@@ -69,8 +69,8 @@ exports.fetch = function(req, res){
         var files = [];
         var fileCount = 0;
         if (folder != '') {
-          console.log('  Located assets: ' + folder );
           var fullName = formRegionFolderName(fips_code) + '/imagesets-/' + folder;
+          console.log('  Located assets: ' + fullName );
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
             secret: process.env.KC_SECRET,
@@ -187,8 +187,8 @@ exports.fetchAll = function(req, res){
         var files = [];
         var fileCount = 0;
         if (folder != '') {
-          console.log('  Located assets: ' + folder );
           var fullName = formRegionFolderName(fips_code) + '/imagesets-/' + folder;
+          console.log('  Located assets: ' + fullName );
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
             secret: process.env.KC_SECRET,
