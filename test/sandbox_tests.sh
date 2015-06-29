@@ -50,14 +50,14 @@ do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0" test
 do_curl "${dq_proto}://${dq_host}/DQ/docURL/?version=1.0.0" test_docurl_generic.json
 
 do_curl "${dq_proto}://${dq_host}/DQ/docURL?propertyID=102613&version=1.0.0" test_docurl_single.json
-do_curl "${dq_proto}://${dq_host}//DQ/docURL?propertyID=102613&version=1.0.0" test_docurl_url_test1.json
 
+do_curl "${dq_proto}://${dq_host}/DQ/docCollection?propertyIdBin=153058&propertyIdBin=5473&version=1.0.0&type=pdf" test_doccollection.json
 
 do_curl "${dq_proto}://${dq_host}/DQ/docURL?propertyID=131292&version=1.0.0" test_docurl_double.json
 
 do_curl "${dq_proto}://${dq_host}/DQ/docURL?parcelID=3434&version=1.0.0" test_docurl_single_parcelid.json
 
-do_curl "${dq_proto}://${dq_host}/DQ/docURL/imageSet-?version=1.0.0" test_imageset_generic.json
+do_curl "${dq_proto}://${dq_host}/DQ/regionAsset?region=US11001&resource=fredRecessionDates" test_regionasset.json
 
 
 
