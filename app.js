@@ -51,6 +51,7 @@ app.get('/DQ/docURL', docURL.fetch );
 app.get('/DQ/docCollection', docURL.fetchAll );
 app.get('/DQ/userdata', userdata.fetch);
 app.get('/DQ/regiondata', region.fetch);
+app.get('/DQ/regionasset', region.fetchAsset);
 app.get('/DQ/region', region.find);
 app.get('/DQ/nearbyregions', region.adjacent);
 

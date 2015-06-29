@@ -1,5 +1,6 @@
 var express     = require('express');
 var pg          = require('pg');
+var AWS         = require('aws-sdk');
 
 var router = express.Router();
 
@@ -200,3 +201,104 @@ exports.adjacent = function(req, res){
 
 };
 
+/*
+ *  This function takes the fips code for the region and forms the pathname from that needed to access
+ *  the assets for that region...
+*/
+formRegionFolderName = function(fips_code, level) {
+  if (fips_code == 'null') {
+    console.log('Using default US11001 for region');
+    fips_code = 'US11001';  // in case don't supply fips_code, default to Washington DC
+  }
+  var fips_country = fips_code.substring(0,2);
+  if (level == 0) {
+    return process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/regional/';
+  }
+  var fips_state = fips_code.substring(0,4);
+  if (level == 1) {
+    return process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/state/' + fips_state + '/regional/';
+  }
+  // if here, want full local folders
+  var fullName = process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/state/' + fips_state + '/county/' + fips_code + '/regional/';
+  return fullName;
+
+};
+
+/*
+ *  return a regional asset file (.json) back to client
+ *  Params:
+ *    regionID=fips_code (required; example regionID=US11001)
+ */
+exports.fetchAsset = function(req, res){
+  var fips_code = req.query.region || 'US11001';
+  var resource = req.query.resource;
+  console.log("Running region asset fetch for specified fips code: " + fips_code);
+  console.log(req.query);
+  res.setHeader("Access-Control-Allow-Origin", "*");
+/*mor
+ * This code reads an asset file from remote s3 repository
+ *  Note: we try local, then state, then country in that order to fetch asset
+ *
+ */
+  var resourceFile = formRegionFolderName(fips_code, 2) + resource + '.json';
+  var s3 = new AWS.S3();
+  var params = {Bucket: process.env.S3_ASSET_BUCKET, Key: resourceFile };
+  var s3file = s3.getObject(params, function(err, data) {
+    if (err) {
+        // file may be up at state level...
+        resourceFile = formRegionFolderName(fips_code, 1) + resource + '.json';
+        params = {Bucket: process.env.S3_ASSET_BUCKET, Key: resourceFile };
+        s3file = s3.getObject(params, function(err, data) {
+          if (err) {
+            // file may be up at country level...
+             resourceFile = formRegionFolderName(fips_code, 0) + resource + '.json';
+             params = {Bucket: process.env.S3_ASSET_BUCKET, Key: resourceFile };
+             s3file = s3.getObject(params, function(err, data) {
+                 if (err) {
+                     // report error since could not find resource file
+                     console.log('An error occurred while fetching DQ regional asset; ' + resource + ' with status: ' + err);
+                     res.status(404).send('Resource not found: ' + resourceFile);
+                 }
+                 else {
+                     // return json object that corresponds to best version available within resource file
+                     try {
+                         var jsonData = JSON.parse(data.Body);
+                         //console.log(jsonData);
+                         res.send(jsonData);
+                     }
+                     catch(e) {
+                         console.log(e);
+                         res.status(404).send('Error parsing JSON for resource: ' + resource + " Error: " + e);
+                     }
+                 }
+             });
+          }
+          else {
+            // return json object that corresponds to best version available within resource file
+            try {
+                var jsonData = JSON.parse(data.Body);
+                //console.log(jsonData);
+                res.send(jsonData);
+            }
+            catch(e) {
+                console.log(e);
+                res.status(404).send('Error parsing JSON for resource: ' + resource + " Error: " + e);
+            }
+          }
+        });
+    }
+    else {
+        // return json object that corresponds to best version available within resource file
+        try {
+            var jsonData = JSON.parse(data.Body);
+            //console.log(jsonData);
+            res.send(jsonData);
+        }
+        catch(e) {
+            console.log(e);
+            res.status(404).send('Error parsing JSON for resource: ' + resource + " Error: " + e);
+        }
+    }
+
+  });
+};
