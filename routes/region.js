@@ -205,7 +205,7 @@ exports.adjacent = function(req, res){
  *  This function takes the fips code for the region and forms the pathname from that needed to access
  *  the assets for that region...
 */
-formRegionFolderName = function(fips_code, level) {
+formFolderName = function(fips_code, level) {
   if (fips_code == 'null') {
     console.log('Using default US11001 for region');
     fips_code = 'US11001';  // in case don't supply fips_code, default to Washington DC
@@ -228,6 +228,8 @@ formRegionFolderName = function(fips_code, level) {
  *  return a regional asset file (.json) back to client
  *  Params:
  *    regionID=fips_code (required; example regionID=US11001)
+ *  Sample Query:
+ *    http://localhost:3000/DQ/regionAsset?region=US11001&resource=fredRecessionDates
  */
 exports.fetchAsset = function(req, res){
   var fips_code = req.query.region || 'US11001';
@@ -235,23 +237,23 @@ exports.fetchAsset = function(req, res){
   console.log("Running region asset fetch for specified fips code: " + fips_code);
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
-/*mor
+/*
  * This code reads an asset file from remote s3 repository
  *  Note: we try local, then state, then country in that order to fetch asset
  *
  */
-  var resourceFile = formRegionFolderName(fips_code, 2) + resource + '.json';
+  var resourceFile = formFolderName(fips_code, 2) + resource + '.json';
   var s3 = new AWS.S3();
   var params = {Bucket: process.env.S3_ASSET_BUCKET, Key: resourceFile };
   var s3file = s3.getObject(params, function(err, data) {
     if (err) {
         // file may be up at state level...
-        resourceFile = formRegionFolderName(fips_code, 1) + resource + '.json';
+        resourceFile = formFolderName(fips_code, 1) + resource + '.json';
         params = {Bucket: process.env.S3_ASSET_BUCKET, Key: resourceFile };
         s3file = s3.getObject(params, function(err, data) {
           if (err) {
             // file may be up at country level...
-             resourceFile = formRegionFolderName(fips_code, 0) + resource + '.json';
+             resourceFile = formFolderName(fips_code, 0) + resource + '.json';
              params = {Bucket: process.env.S3_ASSET_BUCKET, Key: resourceFile };
              s3file = s3.getObject(params, function(err, data) {
                  if (err) {
