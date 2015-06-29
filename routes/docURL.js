@@ -13,9 +13,9 @@ formRegionFolderName = function(fips_code) {
     console.log('Using default US11001 for region');
     fips_code = 'US11001';  // in case don't supply fips_code, default to Washington DC
   }
-  var fips_country = fips_code.substring(0,1);
-  var fips_state = fips_code.substring(2,3);
-  var fips_county = fips_code.substring(4,6);
+  var fips_country = fips_code.substring(0,2);
+  var fips_state = fips_code.substring(2,4);
+  var fips_county = fips_code.substring(4,7);
   var fullName = process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/state/' + fips_state + '/county/' + fips_county;
 
  return fullName;
