@@ -24,7 +24,7 @@ export GITHUB_OWNER="CreateIO"
 export GITHUB_USER="DiaryQueenRo"
 export GITHUB_TOKEN="4be9d6ff845e754b967169d0ffc8ccd6a641c87f"
 export GITHUB_TEMPLATE_REPO="DQMatchSets"
-export GITHUB_TEMPLATE_BRANCH="test-regions"
+export GITHUB_TEMPLATE_BRANCH="test"
 
 #Local cache
 export LOCAL_CACHE="DQMatchSetsLocal"
