@@ -5,9 +5,11 @@ var AWS         = require('aws-sdk');
 var router = express.Router();
 
 // Temporary mock json result for data sources...
-var mockResults = '{“abrev”: “OTR”,"source":"Example: Office of Tax and Revenue","pull date":"2015-07-01",“learnMoreURL”:”http://otr.cfo.dc.gov/”,' +
-                    '[{“docName”:”OTR Record”,”docURL”:”https://www.taxpayerservicecenter.com/?search_type=Sales”},' +
-                     '{“docName”:”OTR Record”,”docURL”:”https://www.taxpayerservicecenter.com/?search_type=Sales”}]}';
+var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue",' +
+                       '"pull date": "2015-07-01",' +
+                       '"learnMoreURL": "http://otr.cfo.dc.gov/",' +
+                       '"docs": [{"docName": "OTRRecord","docURL": "https: //www.taxpayerservicecenter.com/?search_type=Sales"},' +
+                            '{"docName": "OTRRecord","docURL": "https: //www.taxpayerservicecenter.com/?search_type=Sales"}]}';
 
 /*
  *  SELECT region data for a specified regionID (fips code)
