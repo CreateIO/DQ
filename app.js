@@ -9,6 +9,7 @@ var docURL = require('./routes/docURL');
 var template = require('./routes/template');
 var userdata = require('./routes/userdata');
 var region = require('./routes/region');
+var metadata = require('./routes/metadata');
 
 var http = require('http');
 var path = require('path');
@@ -54,6 +55,7 @@ app.get('/DQ/regiondata', region.fetch);
 app.get('/DQ/regionasset', region.fetchAsset);
 app.get('/DQ/region', region.find);
 app.get('/DQ/nearbyregions', region.adjacent);
+app.get('/DQ/datasource', metadata.dataSource);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));
