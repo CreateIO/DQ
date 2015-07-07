@@ -58,7 +58,8 @@ app.get('/DQ/nearbyregions', region.adjacent);
 app.get('/DQ/datasource', metadata.dataSource);
 
 http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+  console.log('Express DQ server listening on port ' + app.get('port'));
+  console.log('DQ Server version 1.0.1');
 });
 
 
