@@ -28,6 +28,12 @@ sudo apt-get install nodejs-legacy
 npm install
 mkdir logs
 
+#configure for test or prod
+#make sure that the environment file (dq_env.sh) is pointing to the production branch:
+export GITHUB_TEMPLATE_BRANCH="test" (for dq-test.create.io server instance on TRex3 or TRex4)
+export GITHUB_TEMPLATE_BRANCH="prod" (for dq.create.io server instance on TRex prod2 or TRex5)
+
+
 #setup routing for server
 cd /etc/lighttpd/conf-enabled
 sudo cp trex.conf dq.conf
@@ -49,7 +55,7 @@ cd /data/DQ/DQ
 source ./dq_env.sh
 nohup npm start > logs/DQ.log &
 
-#OR USE SCRIPTS!
+#OR USE SCRIPTS (best choice)!
 cd /data/DQ/DQ
 ./run_dq.sh
 
