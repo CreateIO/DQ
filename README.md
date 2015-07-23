@@ -21,18 +21,22 @@ sudo chown ubuntu DQMatchSetsLocal
 cd DQ
 git clone https://www.github.com/CreateIO/DQ
 cd DQ
+
 sudo apt-get install npm
 sudo apt-get install node
 #shouldn't need the following legacy node, but seems necessary...
 sudo apt-get install nodejs-legacy
 npm install
+
+git stash #(to push github-api changes brought in with library)
+git pull #(to overwrite github-api that came with lib)
 mkdir logs
 
 #configure for test or prod
 #make sure that the environment file (dq_env.sh) is pointing to the production branch:
 export GITHUB_TEMPLATE_BRANCH="test" (for dq-test.create.io server instance on TRex3 or TRex4)
 export GITHUB_TEMPLATE_BRANCH="prod" (for dq.create.io server instance on TRex prod2 or TRex5)
-
+#use sudo vim dq_env.sh to change above line if required
 
 #setup routing for server
 cd /etc/lighttpd/conf-enabled
