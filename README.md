@@ -9,8 +9,11 @@ mkdir logs
 npm install
 
 #to run locally
-source source ./dq_env.sh
-npm start
+./run_dq.sh
+##OLD or to run in foreground: source source ./dq_env.sh
+##OLD or to run in foreground: npm start
+#to kill (stop DQ server) if use script (warning: assumes don't have other node processes running, like local TRex or create server):
+killall node
 
 #Steps for installation on ubuntu server
 cd /data
@@ -28,8 +31,8 @@ sudo apt-get install node
 sudo apt-get install nodejs-legacy
 npm install
 
-git stash #(to push github-api changes brought in with library)
-git pull #(to overwrite github-api that came with lib)
+##NO LONGER NEEDED: git stash #(to push github-api changes brought in with library)
+##NO LONGER NEEDED: git pull #(to overwrite github-api that came with lib)
 mkdir logs
 
 #configure for test or prod

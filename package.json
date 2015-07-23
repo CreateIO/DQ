@@ -13,7 +13,7 @@
     "express-json": "^1.0.0",
     "express-session": "^1.11.1",
     "favicon": "0.0.2",
-    "github-api": "^0.10.6",
+    "github-api": "git://github.com/CreateIO/github",
     "jade": "^1.9.2",
     "json": "^9.0.3",
     "knox-copy": "^0.4.0",
