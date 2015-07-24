@@ -28,3 +28,4 @@ export GITHUB_TEMPLATE_BRANCH="test"
 
 #Local cache
 export LOCAL_CACHE="DQMatchSetsLocal"
+export PASSPHRASE="test-Access*98765!"
