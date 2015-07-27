@@ -4,6 +4,7 @@ var fs          = require('fs');
 //var AWS         = require('aws-sdk');
 var Github = require('github-api');
 var mkdirp = require('mkdirp');
+var rmdir = require('rmdir');
 
 var router = express.Router();
 
@@ -52,12 +53,12 @@ function writeToCache( fs, fd, resourceFile, contents )
    });
 }
 
-function writeToLocalCache( resource, fips_code, contents )
+function writeToLocalCache( resource, branch, fips_code, contents )
 {
-  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + fips_code + '/template/' + resource + '.json';
+  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + fips_code + '/template/' + resource + '.json';
   var fd = fs.open(resourceFile, 'w', function( err, fd ) {
       if (err){
-        var regionFolder = '../' + process.env.LOCAL_CACHE  + '/' + fips_code;
+        var regionFolder = '../' + process.env.LOCAL_CACHE  + '/' + branch + '/' + fips_code;
         var moreFolders = resource.split("/");  // any more folders?
         var templateFolder = regionFolder + '/template';
         console.log(moreFolders);
@@ -93,7 +94,7 @@ function writeToLocalCache( resource, fips_code, contents )
 /*
  * This code reads template file from a github repository for a specific branch or tag
  */
-function readFromGitHub( res, resource, fips_code, version )
+function readFromGitHub( res, resource, branch, fips_code, version )
 {
   // Note: we get github values (user, token, repo, branch) from global environment specified in dq_env.sh
   var github = new Github({
@@ -101,10 +102,10 @@ function readFromGitHub( res, resource, fips_code, version )
     auth: "oauth"
   });
   var repo = github.getRepo(process.env.GITHUB_OWNER, process.env.GITHUB_TEMPLATE_REPO);
-  var resourceFile = fips_code + '/template/' + resource + '.json';
+  var resourceFile = process.env.GITHUB_FOLDER + fips_code + '/template/' + resource + '.json';
 
-  console.log('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + process.env.GITHUB_TEMPLATE_BRANCH);
-  repo.read(process.env.GITHUB_TEMPLATE_BRANCH, resourceFile, function(err, data) {
+  console.log('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + branch);
+  repo.read(branch, resourceFile, function(err, data) {
     if (err) {
         // report error since could not find resource file
         console.log('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
@@ -119,7 +120,7 @@ function readFromGitHub( res, resource, fips_code, version )
             res.send(resultObject);
 
             // now that have data, cache it locally!
-            writeToLocalCache( resource, fips_code, data );
+            writeToLocalCache( resource, branch, fips_code, data );
         }
         catch(e) {
             console.log(e);
@@ -134,27 +135,39 @@ function readFromGitHub( res, resource, fips_code, version )
  *  GET data for a specified template/region/ID
  */
 exports.fetch = function(req, res){
-  console.log("Running fetch for specified template:");
+  console.log('Running fetch for specified template:');
+
+  // first make sure have required values...
+  if (typeof req.query.resource === 'undefined' || req.query.resource === null) {
+    console.log('  Input error: no template specified' );
+    return res.status(404).send('Missing resource');
+  }
+  if (typeof req.query.resource === 'undefined' || req.query.resource === null) {
+    console.log('  Input error: no version specified' );
+    return res.status(404).send('Missing version');
+  }
   var resource = req.query.resource;
   var version = req.query.version;
-  var fips_code = req.query.region || 'US11001';
-  var cacheFlag = req.query.cache || 'true';
-  console.log(req.query);
-  console.log("   requested resource: " + resource );
-//  console.log("   cache flag: " + cacheFlag);
+  var fips_code = req.query.region || 'US11001';                        // use DC if not specified in request
+  var cacheFlag = req.query.cache || 'true';                            // use cache if not specified in request
+  var branch = req.query.branch || process.env.GITHUB_TEMPLATE_BRANCH;  // use env. branch if not specified in request
 
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+//  console.log(req.query);
+  console.log('   requested resource: ' + resource + ' on branch: ' + branch);
+//  console.log("   cache flag: " + cacheFlag);
 
 /*
  * Read file from local cache if using cache
  */
-  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + fips_code + '/template/' + resource + '.json';
+  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + fips_code + '/template/' + resource + '.json';
   console.log("   file URL: " + resourceFile );
   if (cacheFlag == 'true') {
       fs.readFile(resourceFile, 'utf8', function(err,data) {
         if (err || data.length < 1) {
             // try github since file not available in local cache
-            readFromGitHub( res, resource, fips_code, version );
+            readFromGitHub( res, resource, branch, fips_code, version );
         }
         else {
             // return json object that corresponds to best version available within resource file
@@ -170,7 +183,7 @@ exports.fetch = function(req, res){
   else {
     // if here, don't want cached result (for dev and testing purposes)
     // go grab github file directly
-    readFromGitHub( res, resource, fips_code, version );
+    readFromGitHub( res, resource, branch, fips_code, version );
   }
 
 /*
@@ -219,5 +232,44 @@ exports.fetch = function(req, res){
     }
   });
 */
+};
+
+/*
+ *  Clear local cache for the specified branch data.  This will force a clean fetch from github for all template resources
+ */
+exports.clear = function(req, res){
+  console.log('Running clear for specified branch in local template cache:');
+
+  // first make sure have required values...
+  if (typeof req.query.branch === "undefined" || req.query.branch === null) {
+    console.log('  Input error: no branch specified' );
+    return res.status(404).send('Missing branch');
+  }
+  if (typeof req.query.passphrase === "undefined" || req.query.passphrase === null) {
+    console.log('  Input error: no passphrase specified' );
+    return res.status(404).send('Missing authorization code');
+  }
+  var branch = req.query.branch;
+  var passphrase = req.query.passphrase
+  if (passphrase != process.env.PASSPHRASE)
+  {
+    console.log('  Input error: invalid passphrase.  Received: ' + passphrase );
+    return res.status(404).send('Invalid authorization code');
+  }
+
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  var branchFolder = '../' + process.env.LOCAL_CACHE  + '/' + branch;
+  rmdir( branchFolder, function ( err, dirs, files ){
+    if (err) {
+      console.log( '   Error removing branch' + branchFolder + 'from local cache');
+      console.log(err);
+      return res.status(404).send('Error removing branch: ' + err);
+    }
+    else {
+      console.log( '   Branch ' + branchFolder + ' removed from local cache' );
+      return res.status(200).send('Branch cleared');
+    }
+  });
 };
 

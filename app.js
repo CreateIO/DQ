@@ -48,6 +48,7 @@ app.get('/', routes.index);
 //app.get('/users', user.list);
 //app.get('/tag', tag.find);
 app.get('/DQ/template', template.fetch);
+app.get('/DQ/clearCache', template.clear);
 app.get('/DQ/docURL', docURL.fetch );
 app.get('/DQ/docCollection', docURL.fetchAll );
 app.get('/DQ/userdata', userdata.fetch);
@@ -59,7 +60,7 @@ app.get('/DQ/datasource', metadata.dataSource);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express DQ server listening on port ' + app.get('port'));
-  console.log('DQ Server version 1.0.1');
+  console.log('DQ Server version 1.0.2');
 });
 
 
