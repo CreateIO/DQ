@@ -25,6 +25,8 @@ export GITHUB_USER="DiaryQueenRo"
 export GITHUB_TOKEN="4be9d6ff845e754b967169d0ffc8ccd6a641c87f"
 export GITHUB_TEMPLATE_REPO="DQMatchSets"
 export GITHUB_TEMPLATE_BRANCH="test"
+export GITHUB_FOLDER=""
+#export GITHUB_FOLDER="DQTemplates/"    #Don't forget trailing "/"   !!!
 
 #Local cache
 export LOCAL_CACHE="DQMatchSetsLocal"

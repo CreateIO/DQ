@@ -102,7 +102,7 @@ function readFromGitHub( res, resource, branch, fips_code, version )
     auth: "oauth"
   });
   var repo = github.getRepo(process.env.GITHUB_OWNER, process.env.GITHUB_TEMPLATE_REPO);
-  var resourceFile = fips_code + '/template/' + resource + '.json';
+  var resourceFile = process.env.GITHUB_FOLDER + fips_code + '/template/' + resource + '.json';
 
   console.log('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + branch);
   repo.read(branch, resourceFile, function(err, data) {
