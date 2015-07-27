@@ -104,7 +104,7 @@ function readFromGitHub( res, resource, branch, fips_code, version )
   var repo = github.getRepo(process.env.GITHUB_OWNER, process.env.GITHUB_TEMPLATE_REPO);
   var resourceFile = fips_code + '/template/' + resource + '.json';
 
-  console.log('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + process.env.GITHUB_TEMPLATE_BRANCH);
+  console.log('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + branch);
   repo.read(branch, resourceFile, function(err, data) {
     if (err) {
         // report error since could not find resource file
@@ -155,7 +155,7 @@ exports.fetch = function(req, res){
   res.setHeader('Access-Control-Allow-Origin', '*');
 
 //  console.log(req.query);
-  console.log('   requested resource: ' + resource + ' on branch: ' );
+  console.log('   requested resource: ' + resource + ' on branch: ' + branch);
 //  console.log("   cache flag: " + cacheFlag);
 
 /*
