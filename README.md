@@ -72,8 +72,10 @@ Files pushed into the template folder become immediately accessable in the dq-te
 Files are normally cached locally on the server, but if that call includes "&cache=false", then a re-pull from the DQMatchSets repository
  will occur for each file accesed this way.
 
-Note: the repository branch where pulls are made is currently set to 'master', but can be changed in the DQ server environment file (dq_env.sh)
+
+Note: the repository branch where pulls are made is currently set to 'test', but can be changed in the DQ server environment file (dq_env.sh),
+    and can be overridden by using the optional branch in the DQService call.
 
 Example calls to the DQ for template resources:
 https://dq-test.create.io/DQ/template?resource=tabs-&version=1.0.0  (normal, use local cache if available)
-https://dq-test.create.io/DQ/template?resource=tabs-&version=1.0.0&cache=false (do not use local cache, re-grab file from git repository
+https://dq-test.create.io/DQ/template?resource=tabs-&version=1.0.0&cache=false&branch=my_branch (pull from my_branch; do not use local cache, re-grab file from git repository
