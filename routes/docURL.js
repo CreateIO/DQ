@@ -56,7 +56,7 @@ exports.fetch = function(req, res){
       done();
       pg.end()
       console.log(err);
-    return res.json([{"status":"Error: Unable to connect to DQ database", "count":0, "fileNames":[]}]);
+      return res.json([{"status":"Error: Unable to connect to DQ database", "count":0, "fileNames":[]}]);
     }
 
     // retrieve files for the given row that retreived from DB
@@ -92,6 +92,10 @@ exports.fetch = function(req, res){
             results[rowIndex].status = "success";
             results[rowIndex].count = fileCount;
             getFiles( ++rowIndex );   // process next site returned
+          }).on('error', function(err) {
+            console.log('Encountered error on knoxCopy request:')
+            console.log(err);
+            return res.json([{"status":"Error: Unable to connect to S3 repository", "count":0, "fileNames":[]}]);
           });
         }
         else {
@@ -210,6 +214,10 @@ exports.fetchAll = function(req, res){
             results[rowIndex].status = "success";
             results[rowIndex].count = fileCount;
             getFiles( ++rowIndex );   // process next site returned
+          }).on('error', function(err) {
+            console.log('Encountered error on knoxCopy request:')
+            console.log(err);
+            return res.json([{"status":"Error: Unable to connect to S3 repository", "count":0, "fileNames":[]}]);
           });
         }
         else {
