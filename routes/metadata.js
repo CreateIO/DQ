@@ -6,8 +6,9 @@ var router = express.Router();
 
 // Temporary mock json result for data sources...
 var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue",' +
-                       '"pull date": "2015-07-01",' +
+                       '"pullDate": "2015-07-01",' +
                        '"learnMoreURL": "http://otr.cfo.dc.gov/",' +
+                       '"contact":"suggest@create.io",' +
                        '"docs": [{"docName": "OTRRecord","docURL": "https: //www.taxpayerservicecenter.com/?search_type=Sales"},' +
                             '{"docName": "OTRRecord","docURL": "https: //www.taxpayerservicecenter.com/?search_type=Sales"}]}';
 
@@ -15,8 +16,13 @@ var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue
  *  SELECT region data for a specified regionID (fips code)
  *  Params:
  *    regionID=fips_code (required; example regionID=US11001)
+ *  Example call: http://dq-test/DQ/datasource?dataName=property.address&regionID=US11001
  */
 exports.dataSource = function(req, res){
+  if (typeof req.query.dataName === "undefined" || req.query.dataName === null) {
+    console.log('  Input error: no dataName specified' );
+    return res.status(404).send('Missing dataName');
+  }
   var regionID = req.query.regionID || 'US11001';
   var dataName = req.query.source_name;
   console.log('Running data source query for ' + dataName + ' in fips code: ' + regionID);
