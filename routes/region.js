@@ -17,7 +17,7 @@ exports.fetch = function(req, res){
   res.setHeader("Access-Control-Allow-Origin", "*");
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
-  var selectString = "SELECT * FROM region_fips WHERE fips_code = '" + regionID + ";";
+  var selectString = "SELECT * FROM region_fips WHERE fips_code = '" + regionID + "';";
   var results = [];
   var rows = 0;
   var connectionDef = {
