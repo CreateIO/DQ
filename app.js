@@ -10,6 +10,7 @@ var template = require('./routes/template');
 var userdata = require('./routes/userdata');
 var region = require('./routes/region');
 var metadata = require('./routes/metadata');
+var version = require('./routes/version');
 
 var http = require('http');
 var path = require('path');
@@ -57,10 +58,11 @@ app.get('/DQ/regionasset', region.fetchAsset);
 app.get('/DQ/region', region.find);
 app.get('/DQ/nearbyregions', region.adjacent);
 app.get('/DQ/datasource', metadata.dataSource);
+app.get('/DQ/version', version.fetch);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express DQ server listening on port ' + app.get('port'));
-  console.log('DQ Server version 1.0.2');
+  console.log('DQ Server version: ' + process.env.version);
 });
 
 
@@ -68,4 +70,3 @@ function errorHandler(err, req, res, next) {
   res.status(500);
   res.render('error', { error: err });
 }
-

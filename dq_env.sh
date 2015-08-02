@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export VERSION='1.1.0'
 #postgres dq
 export DB_HOST="dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com"
 export DB_NAME="DQ"
