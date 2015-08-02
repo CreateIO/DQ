@@ -48,7 +48,7 @@ do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-" test_tabs_generic_
 do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0" test_tabs_generic.json
 do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=master&passphrase=test-Access*98765!" test_tabs_branch.json
 
-do_curl "${dq_proto}://${dq_host}/DQ/clearCache?&branch=master" test_clear_cache.json
+do_curl "${dq_proto}://${dq_host}/DQ/clearCache?&branch=master&passphrase=test-Access*98765!" test_clear_cache.json
 
 do_curl "${dq_proto}://${dq_host}/DQ/docURL/?version=1.0.0" test_docurl_generic.json
 
@@ -64,6 +64,8 @@ do_curl "${dq_proto}://${dq_host}/DQ/regionAsset?region=US11001&resource=fredRec
 
 do_curl "${dq_proto}://${dq_host}/DQ/regionAsset?region=US11001&resource=fredRecessionDates" test_regionasset.json
 
+do_curl "${dq_proto}://${dq_host}/DQ/region?lat=38.9041485&long=-77.017094" test_fetchregion.json
 
+do_curl "${dq_proto}://${dq_host}/DQ/version" test_fetchversion.json
 
 

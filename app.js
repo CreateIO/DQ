@@ -61,8 +61,7 @@ app.get('/DQ/datasource', metadata.dataSource);
 app.get('/DQ/version', version.fetch);
 
 http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express DQ server listening on port ' + app.get('port'));
-  console.log('DQ Server version: ' + process.env.version);
+  console.log('Express DQ server, version: ' + process.env.VERSION + '; listening on port ' + app.get('port'));
 });
 
 

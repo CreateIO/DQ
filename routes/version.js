@@ -18,6 +18,6 @@ exports.fetch = function(req, res){
                 '"GITHUB_TEMPLATE_REPO":"' + process.env.GITHUB_TEMPLATE_REPO + '",' +
                 '"GITHUB_TEMPLATE_BRANCH":"' + process.env.GITHUB_TEMPLATE_BRANCH + '"}';
 
-  return result;
+  return res.status(200).send(result);
 };
 

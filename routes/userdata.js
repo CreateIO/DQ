@@ -9,7 +9,8 @@ var router = express.Router();
 exports.fetch = function(req, res){
   var propertyID = req.query.propertyID;
   var version = req.query.version;
-  console.log("Running userdata fetch for specified propertyID: " + propertyID);
+  var datetime = new Date();
+  console.log(datetime + ': Running userdata fetch for specified propertyID: ' + propertyID);
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
