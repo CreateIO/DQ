@@ -24,8 +24,9 @@ exports.dataSource = function(req, res){
     return res.status(404).send('Missing dataName');
   }
   var regionID = req.query.regionID || 'US11001';
-  var dataName = req.query.source_name;
-  console.log('Running data source query for ' + dataName + ' in fips code: ' + regionID);
+  var dataName = req.query.dataName;
+  var datetime = new Date();
+  console.log(datetime + ': Running data source query for ' + dataName + ' in fips code: ' + regionID);
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 

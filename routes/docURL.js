@@ -35,7 +35,8 @@ exports.fetch = function(req, res){
   var version = req.query.version;
   var type = req.query.type;
   var fips_code = req.query.region || 'US11001';
-  console.log("Running docURL fetch for specified propertyID: " + propertyID + " in region " + fips_code);
+  var datetime = new Date();
+  console.log(datetime + ': Running docURL fetch for specified propertyID: ' + propertyID + ' in region ' + fips_code);
   console.log(req.query);
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
@@ -158,7 +159,8 @@ exports.fetchAll = function(req, res){
   var version = req.query.version;
   var type = req.query.type;
   var fips_code = req.query.region || 'US11001';
-  console.log("Running docURL fetchAll for collection of propertyID: " + propertyIdBin + " in region " + fips_code);
+  var datetime = new Date();
+  console.log(datetime + ': Running docURL fetchAll for collection of propertyID: ' + propertyIdBin + ' in region ' + fips_code);
   console.log(req.query);
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';

@@ -11,12 +11,13 @@ var router = express.Router();
  */
 exports.fetch = function(req, res){
   var regionID = req.query.regionID;
-  console.log("Running regiondata fetch for specified fips code: " + regionID);
+  var datetime = new Date();
+  console.log(datetime + ': Running regiondata fetch for specified fips code: ' + regionID);
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
-  var selectString = "SELECT * FROM region_fips WHERE fips_code = '" + regionID + ";";
+  var selectString = "SELECT * FROM region_fips WHERE fips_code = '" + regionID + "';";
   var results = [];
   var rows = 0;
   var connectionDef = {
@@ -78,8 +79,9 @@ exports.find = function(req, res){
   var longitude = req.query.long;
   var latitude = req.query.lat;
   var regionLevel = req.query.level || 2;   // default to county level (level 2)
-  console.log("Running query to find region that includes given longitude=" + longitude + "; latitude=" + latitude + " for level >= : " + regionLevel + ";");
-  console.log(req.query);
+  var datetime = new Date();
+  console.log(datetime + ": Running query to find region that includes given longitude=" + longitude + "; latitude=" + latitude + " for level >= : " + regionLevel);
+//  console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
@@ -142,7 +144,8 @@ exports.find = function(req, res){
  */
 exports.adjacent = function(req, res){
   var regionID = req.query.regionID;
-  console.log("Running regiondata fetch for specified fips code: " + regionID);
+  var datetime = new Date();
+  console.log(datetime + ': Running regiondata fetch for specified fips code: ' + regionID);
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -234,7 +237,8 @@ formFolderName = function(fips_code, level) {
 exports.fetchAsset = function(req, res){
   var fips_code = req.query.region || 'US11001';
   var resource = req.query.resource;
-  console.log("Running region asset fetch for specified fips code: " + fips_code);
+  var datetime = new Date();
+  console.log(datetime + ': Running region asset fetch for specified fips code: ' + fips_code);
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 /*
@@ -259,7 +263,9 @@ exports.fetchAsset = function(req, res){
                  if (err) {
                      // report error since could not find resource file
                      console.log('An error occurred while fetching DQ regional asset; ' + resource + ' with status: ' + err);
-                     res.status(404).send('Resource not found: ' + resourceFile);
+            var datetime = new Date();
+            console.log(datetime + ': Running fetch for specified template:');
+           res.status(404).send('Resource not found: ' + resourceFile);
                  }
                  else {
                      // return json object that corresponds to best version available within resource file

@@ -135,7 +135,8 @@ function readFromGitHub( res, resource, branch, fips_code, version )
  *  GET data for a specified template/region/ID
  */
 exports.fetch = function(req, res){
-  console.log('Running fetch for specified template:');
+  var datetime = new Date();
+  console.log(datetime + ': Running fetch for specified template:');
 
   // first make sure have required values...
   if (typeof req.query.resource === 'undefined' || req.query.resource === null) {
@@ -238,7 +239,8 @@ exports.fetch = function(req, res){
  *  Clear local cache for the specified branch data.  This will force a clean fetch from github for all template resources
  */
 exports.clear = function(req, res){
-  console.log('Running clear for specified branch in local template cache:');
+  var datetime = new Date();
+  console.log(datetime + ': Running clear for specified branch in local template cache:');
 
   // first make sure have required values...
   if (typeof req.query.branch === "undefined" || req.query.branch === null) {
