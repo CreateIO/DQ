@@ -70,5 +70,5 @@ do_curl "${dq_proto}://${dq_host}/DQ/regiondata?regionID=US11001" test_regiondat
 
 do_curl "${dq_proto}://${dq_host}/DQ/version" test_fetchversion.json
 
-do_curl "${dq_proto}://${dq_host}/DQ/datasource?dataName=property.address&regionID=US11001" test_datasource.json
+do_curl "${dq_proto}://${dq_host}/DQ/datasource?fieldName=airRights&regionID=US11001" test_datasource.json
 

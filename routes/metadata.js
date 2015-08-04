@@ -1,9 +1,9 @@
 var express     = require('express');
 var pg          = require('pg');
-var AWS         = require('aws-sdk');
 
 var router = express.Router();
 
+/*
 // Temporary mock json result for data sources...
 var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue",' +
                        '"pullDate": "2015-07-01",' +
@@ -11,7 +11,7 @@ var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue
                        '"contact":"suggest@create.io",' +
                        '"docs": [{"docName": "OTRRecord","docURL": "https: //www.taxpayerservicecenter.com/?search_type=Sales"},' +
                             '{"docName": "OTRRecord","docURL": "https: //www.taxpayerservicecenter.com/?search_type=Sales"}]}';
-
+*/
 /*
  *  SELECT region data for a specified regionID (fips code)
  *  Params:
@@ -19,23 +19,19 @@ var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue
  *  Example call: http://dq-test/DQ/datasource?dataName=property.address&regionID=US11001
  */
 exports.dataSource = function(req, res){
-  if (typeof req.query.dataName === "undefined" || req.query.dataName === null) {
-    console.log('  Input error: no dataName specified' );
-    return res.status(404).send('Missing dataName');
+  if (typeof req.query.fieldName === "undefined" || req.query.fieldName === null) {
+    console.log('  Input error: no fieldName specified' );
+    return res.status(404).send('Missing fieldName');
   }
   var regionID = req.query.regionID || 'US11001';
-  var dataName = req.query.dataName;
+  var fieldName = req.query.fieldName;
   var datetime = new Date();
-  console.log(datetime + ': Running data source query for ' + dataName + ' in fips code: ' + regionID);
+  console.log(datetime + ': Running data source query for ' + fieldName + ' in region: ' + regionID);
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  // temporary mock data result return...
-  return res.json(JSON.parse(mockResults));
-
-/*
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
-  var selectString = "SELECT * FROM data_source WHERE fips_code = '" + regionID + ";";
+  var selectString = "select * from field_source INNER JOIN data_source USING (source) WHERE '" + fieldName + "' = ANY(field_source.field_name) AND field_source.regionid = '" + regionID + "';";
   var results = [];
   var rows = 0;
   var connectionDef = {
@@ -66,7 +62,11 @@ exports.dataSource = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
             client.end();
-            console.log('Read ' + rows)
+            if (rows == 0){
+                console.log("INFO: requested fieldName: " + fieldName + " not found in field_sources DB");
+            } else {
+                console.log('Read ' + rows);
+            }
 //            console.log(results);
            done();
            pg.end();
@@ -84,5 +84,5 @@ exports.dataSource = function(req, res){
       }
 
   });
-*/
+
 };
