@@ -19,12 +19,12 @@ var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue
  *  Example call: http://dq-test/DQ/datasource?dataName=property.address&regionID=US11001
  */
 exports.dataSource = function(req, res){
-  if (typeof req.query.fieldName === "undefined" || req.query.fieldName === null) {
-    console.log('  Input error: no fieldName specified' );
-    return res.status(404).send('Missing fieldName');
+  if (typeof req.query.source_name === "undefined" || req.query.source_name === null) {
+    console.log('  Input error: no source_name specified' );
+    return res.status(404).send('Missing source_name');
   }
   var regionID = req.query.regionID || 'US11001';
-  var fieldName = req.query.fieldName;
+  var fieldName = req.query.source_name;
   var datetime = new Date();
   console.log(datetime + ': Running data source query for ' + fieldName + ' in region: ' + regionID);
   console.log(req.query);
@@ -63,7 +63,7 @@ exports.dataSource = function(req, res){
         query.on('end', function() {
             client.end();
             if (rows == 0){
-                console.log("INFO: requested fieldName: " + fieldName + " not found in field_sources DB");
+                console.log("INFO: requested source_name: " + fieldName + " not found in field_sources DB");
             } else {
                 console.log('Read ' + rows);
             }
