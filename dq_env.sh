@@ -2,7 +2,7 @@
 
 export VERSION="1.1.0"
 #postgres dq
-export DB_HOST="dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com"
+export DB_HOST="dq-prod.cvwdsktow3o7.us-east-1.rds.amazonaws.com"
 export DB_NAME="DQ"
 export PG_USER="DQUser"
 export PG_PASSWORD="ty2015!letmein*"
