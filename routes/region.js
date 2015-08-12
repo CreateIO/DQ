@@ -5,7 +5,7 @@ var AWS         = require('aws-sdk');
 var router = express.Router();
 
 /*
- *  SELECT region data for a specified regionID (fips code)
+ *  SELECT all region data (less geometry) for a specified regionID (fips code)
  *  Params:
  *    regionID=regionID (required; example regionID=US11001)
  */
@@ -22,7 +22,9 @@ exports.fetch = function(req, res){
   }
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
-  var selectString = "SELECT * FROM region_tags WHERE region_id = '" + regionID + "';";
+  var selectString = 'SELECT region_level, region_typename, region_child_typename, region_full_name, region_name, ' +
+    'region_abbrev, intpt_lat , intpt_lon, num_children, tag_country, tag_level1, tag_level2, tag_level3, ' +
+    'region_id, area_land, area_water FROM region_tags WHERE region_id = '" + regionID + "';";
   var results = [];
   var rows = 0;
   var connectionDef = {
@@ -75,32 +77,151 @@ exports.fetch = function(req, res){
 };
 
 /*
- *  FIND a region (or regions) that contains the given lat/long
+ *  Locate all regions (at all levels) that contains the given lat/long
  *    long= (required)
  *    lat= (required)
- *    level=regionLevel (optional; example: level=2 for only the county level result, level=1 for county+state, level = 0 for country+state+county
  */
-exports.find = function(req, res){
+exports.locate = function(req, res){
   var longitude = req.query.long;
   var latitude = req.query.lat;
-  var regionLevel = req.query.level || 3;   // default to city level (level 3)
   var datetime = new Date();
-  console.log(datetime + ": Running query to find region that includes given longitude=" + longitude + "; latitude=" + latitude + " for level >= : " + regionLevel);
+  console.log(datetime + ": Running query to find region that includes given longitude=" + longitude + "; latitude=" + latitude);
 //  console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  if (typeof req.query.req.query.long === "undefined" || req.query.req.query.long === null) {
+  if (typeof req.query.long === "undefined" || req.query.long === null) {
     console.log('  Input error: no longitude (long) specified' );
     return res.status(404).send('Missing longitude (long)');
   }
 
-  if (typeof req.query.req.query.lat === "undefined" || req.query.req.query.lat === null) {
+  if (typeof req.query.lat === "undefined" || req.query.lat === null) {
     console.log('  Input error: no latitude (lat) specified' );
     return res.status(404).send('Missing latitude (lat)');
   }
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
-  var selectString = "Select region_id,region_full_name from region_tags where ST_Contains(wkb_geometry, ST_SetSRID(ST_MakePoint(" + longitude + "," + latitude + "),'4326'));";
+  var selectString = "Select region_id,region_full_name,region_level from region_tags where " +
+    "ST_Contains(wkb_geometry, ST_SetSRID(ST_MakePoint(" + longitude + "," + latitude + "),'4326'));";
+  var results = [];
+  var rows = 0;
+  var connectionDef = {
+    user: process.env.PG_USER,
+    password: process.env.PG_PASSWORD,
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: 5432
+  };
+
+    pg.connect(connectionDef, function(err, client, done) {
+      if(err) {
+        console.log(err);
+        done();
+        pg.end();
+        return res.status(404).send('Unable to connect to DQ database');
+      }
+      else {
+        // SQL Query > Select Data
+        var query = client.query(selectString);
+
+        // Stream results back one row at a time
+        query.on('row', function(row) {
+            results.push(row);
+            rows++;
+        });
+
+        // After all data is returned, close connection and return results
+        query.on('end', function() {
+            client.end();
+            console.log('Read ' + rows)
+//            console.log(results);
+           done();
+           pg.end();
+           return res.json(results);
+        });
+
+        query.on('error', function(error) {
+          //handle the error
+            console.log(error);
+            done();
+            pg.end();
+            return res.status(404).send('Unable to read from DQ database');
+        });
+
+      }
+
+  });
+
+};
+
+/*
+ *  RETURN region(s) that match the specified name string(s)
+ *      Note: depending on which params are provided, this can be a general matching algorithm, or very specific...
+ *      All matching regions at all levels will be returned that match the given input params (zero or more)
+ *  Params:
+ *    name= region name string (could match anything -- state, country, abbreviation, etc.) (optional)
+ *    nameCountry = country name or abbreviation (optional)
+ *    nameState = state name or abbreviation (optional)
+ *    countyName = county name or abbreviation (optional)
+ *    cityName = city name (optional)
+ */
+exports.find = function(req, res){
+  var generalName = req.query.name || '';
+  var countryName = req.query.nameCountry || '';
+  var stateName = req.query.nameState || '';
+  var countyName = req.query.nameCounty || '';
+  var cityName = req.query.nameCity || '';
+  var datetime = new Date();
+  console.log(datetime + ': Running region name search for specified name strings...');
+  console.log(req.query);
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  if ((typeof req.query.name === "undefined" || req.query.name === null) &&
+    (typeof req.query.nameCountry === "undefined" || req.query.nameCountry === null) &&
+    (typeof req.query.nameState === "undefined" || req.query.nameState === null) &&
+    (typeof req.query.nameCounty === "undefined" || req.query.nameCounty === null) &&
+    (typeof req.query.nameCity === "undefined" || req.query.nameCity === null)) {
+    console.log('  Input error: no name string(s)s specified' );
+    return res.status(404).send('Missing name string(s)');
+  }
+
+  var regionSelect = '';
+  var countrySelect = '';
+  var stateSelect = '';
+  var countySelect = '';
+  var citySelect = '';
+  var generalSelect = '';
+  var selectString = "SELECT region_id,region_full_name,region_level from region_tags WHERE "
+
+  if (countryName.length > 0){
+    countrySelect = "tag_country = (SELECT tag_country from region_tags WHERE region_level = 0 AND (region_name = '" +
+        countryName + "' OR region_abbrev = '" + countryName + "') LIMIT 1) ";
+    selectString += countrySelect;
+  }
+  if (stateName.length > 0){
+    stateSelect = "tag_level1 = (SELECT tag_country from region_tags WHERE region_level = 1 AND (region_name = '" +
+        stateName + "' OR region_abbrev = '" + stateName + "') LIMIT 1) ";
+    if (countrySelect.length > 0) selectString += " AND ";
+    selectString += stateSelect;
+  }
+  if (countyName.length > 0){
+    countySelect = "tag_level2 = (SELECT tag_country from region_tags WHERE region_level = 2 AND (region_name = '" +
+        countyName + "' OR region_abbrev = '" + countyName + "') LIMIT 1) ";
+    if (countrySelect.length > 0 || stateSelect.length > 0) selectString += " AND ";
+    selectString += countySelect;
+  }
+  if (cityName.length > 0){
+    citySelect = "tag_level3 = (SELECT tag_country from region_tags WHERE region_level = 3 AND (region_name = '" +
+        cityName + "' OR region_abbrev = '" + cityName + "') LIMIT 10) ";
+    if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0) selectString += " AND ";
+    selectString += citySelect;
+  }
+  if (generalName.length > 0){
+    if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0 || citySelect.length) selectString += " OR ";
+    generalSelect = "region_name = '" + generalName + "' OR region_abbrev = '" + generalName + "'";
+  }
+  selectString += ";";
+
+
   var results = [];
   var rows = 0;
   var connectionDef = {
@@ -246,14 +367,14 @@ formFolderName = function(regionID, level) {
   }
   // if here, must want all of it, including city!
   fullName = process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/state/' + fips_state + '/county/' + fips_county +
-    '/city/' + regionID _ '/regional/';
+    '/city/' + regionID + '/regional/';
   return fullName;
 };
 
 /* getAsset()
  *  recursive function to attempt to read asset at current region level.  If error, go up one level and try again...
  */
-getAsset = function(s3, regionID, regionLevel ) {
+getAsset = function(res, s3, regionID, regionLevel, resource ) {
   var resourceFile = formFolderName(regionID, regionLevel) + resource + '.json';
   var params = {Bucket: process.env.S3_ASSET_BUCKET, Key: resourceFile };
   var s3file = s3.getObject(params, function(err, data) {
@@ -266,7 +387,7 @@ getAsset = function(s3, regionID, regionLevel ) {
         }
         else {
           // if here, file may be up one level, try again...
-          getAsset( s3, regionID, regionLevel);
+          getAsset( res, s3, regionID, regionLevel, resource);
         }
     }
     else {
@@ -305,7 +426,7 @@ exports.fetchAsset = function(req, res){
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  if (typeof req.query.regionID === "undefined" || req.query.regionID === null) {
+  if (typeof req.query.region === "undefined" || req.query.region === null) {
     console.log('  Input error: no region specified' );
     return res.status(404).send('Missing region');
   }
@@ -321,6 +442,6 @@ exports.fetchAsset = function(req, res){
  *
  */
   var s3 = new AWS.S3();
-  getAsset(s3, regionID, regionlevel);
+  getAsset(res, s3, regionID, regionLevel, resource);
 
 };

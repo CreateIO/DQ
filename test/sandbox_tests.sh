@@ -62,6 +62,8 @@ do_curl "${dq_proto}://${dq_host}/DQ/docURL?parcelID=3434&version=1.0.0" test_do
 
 do_curl "${dq_proto}://${dq_host}/DQ/regionAsset?region=US11001&resource=fredRecessionDates" test_regionasset.json
 
+do_curl "${dq_proto}://${dq_host}/DQ/regionAsset?region=US11001_50000&resource=fredRecessionDates" test_regionasset3.json
+
 do_curl "${dq_proto}://${dq_host}/DQ/nearbyregions?regionID=US11001" test_nearbyRegions.json
 
 do_curl "${dq_proto}://${dq_host}/DQ/region?lat=38.9041485&long=-77.017094" test_fetchRegion.json
@@ -70,5 +72,5 @@ do_curl "${dq_proto}://${dq_host}/DQ/regiondata?regionID=US11001" test_regiondat
 
 do_curl "${dq_proto}://${dq_host}/DQ/version" test_fetchversion.json
 
-do_curl "${dq_proto}://${dq_host}/DQ/datasource?fieldName=airRights&regionID=US11001" test_datasource.json
+do_curl "${dq_proto}://${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001" test_datasource.json
 
