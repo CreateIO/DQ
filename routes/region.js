@@ -22,9 +22,9 @@ exports.fetch = function(req, res){
   }
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
-  var selectString = 'SELECT region_level, region_typename, region_child_typename, region_full_name, region_name, ' +
-    'region_abbrev, intpt_lat , intpt_lon, num_children, tag_country, tag_level1, tag_level2, tag_level3, ' +
-    'region_id, area_land, area_water FROM region_tags WHERE region_id = '" + regionID + "';";
+  var selectString = "SELECT region_level, region_typename, region_child_typename, region_full_name, region_name, " +
+    "region_abbrev, intpt_lat , intpt_lon, num_children, tag_country, tag_level1, tag_level2, tag_level3, " +
+    "region_id, area_land, area_water FROM region_tags WHERE region_id = '" + regionID + "';";
   var results = [];
   var rows = 0;
   var connectionDef = {
@@ -193,34 +193,59 @@ exports.find = function(req, res){
   var selectString = "SELECT region_id,region_full_name,region_level from region_tags WHERE "
 
   if (countryName.length > 0){
-    countrySelect = "tag_country = (SELECT tag_country from region_tags WHERE region_level = 0 AND (region_name = '" +
-        countryName + "' OR region_abbrev = '" + countryName + "') LIMIT 1) ";
+    countrySelect = "tag_country IN (SELECT tag_country from region_tags WHERE region_level = 0 AND (region_name = '" +
+        countryName + "' OR region_abbrev = '" + countryName + "')) ";
     selectString += countrySelect;
   }
   if (stateName.length > 0){
-    stateSelect = "tag_level1 = (SELECT tag_country from region_tags WHERE region_level = 1 AND (region_name = '" +
-        stateName + "' OR region_abbrev = '" + stateName + "') LIMIT 1) ";
-    if (countrySelect.length > 0) selectString += " AND ";
+    stateSelect = "tag_level1 IN (SELECT tag_level1 from region_tags WHERE region_level = 1 AND (region_name = '" +
+        stateName + "' OR region_abbrev = '" + stateName + "') ";
+    if (countrySelect.length > 0) {
+        stateSelect += " AND " + countrySelect;
+        selectString += " AND ";
+    }
+    stateSelect += ") ";
     selectString += stateSelect;
   }
   if (countyName.length > 0){
-    countySelect = "tag_level2 = (SELECT tag_country from region_tags WHERE region_level = 2 AND (region_name = '" +
-        countyName + "' OR region_abbrev = '" + countyName + "') LIMIT 1) ";
-    if (countrySelect.length > 0 || stateSelect.length > 0) selectString += " AND ";
+    countySelect = "tag_level2 IN (SELECT tag_level2 from region_tags WHERE region_level = 2 AND (region_name = '" +
+        countyName + "' OR region_abbrev = '" + countyName + "') ";
+    if (stateSelect.length > 0) {
+        countySelect += "AND " + stateSelect;
+        selectString += " AND ";
+    }
+    else if (countrySelect.length > 0){
+        countySelect += "AND " + countrySelect;
+        selectString += " AND ";
+    }
+    countySelect += ") ";
     selectString += countySelect;
   }
   if (cityName.length > 0){
-    citySelect = "tag_level3 = (SELECT tag_country from region_tags WHERE region_level = 3 AND (region_name = '" +
-        cityName + "' OR region_abbrev = '" + cityName + "') LIMIT 10) ";
-    if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0) selectString += " AND ";
+    citySelect = "tag_level3 IN (SELECT tag_level3 from region_tags WHERE region_level = 3 AND (region_name = '" +
+        cityName + "' OR region_abbrev = '" + cityName + "') ";
+    if (countySelect.length > 0) {
+        citySelect += "AND " + countySelect;
+        selectString += " AND ";
+    }
+    else if (stateSelect.length > 0) {
+        citySelect += "AND " + stateSelect;
+        selectString += " AND ";
+    }
+    else if (countrySelect.length > 0){
+        citySelect += "AND " + countrySelect;
+        selectString += " AND ";
+    }
+    citySelect += ") ";
     selectString += citySelect;
   }
   if (generalName.length > 0){
+    generalSelect = "region_full_name LIKE '%" + generalName + "%' OR region_name LIKE '%" + generalName + "%' OR region_abbrev = '" + generalName + "'";
     if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0 || citySelect.length) selectString += " OR ";
-    generalSelect = "region_name = '" + generalName + "' OR region_abbrev = '" + generalName + "'";
+    selectString += generalSelect;
   }
   selectString += ";";
-
+  console.log("Query: " + selectString);
 
   var results = [];
   var rows = 0;

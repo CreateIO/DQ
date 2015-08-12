@@ -74,3 +74,7 @@ do_curl "${dq_proto}://${dq_host}/DQ/version" test_fetchversion.json
 
 do_curl "${dq_proto}://${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001" test_datasource.json
 
+do_curl "${dq_proto}://${dq_host}/DQ/regionFind?nameState=California&nameCity=Glendale" test_regionname.json
+
+do_curl "${dq_proto}://${dq_host}/DQ/regionFind?name=Washington" test regionname2.json
+
