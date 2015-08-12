@@ -16,6 +16,7 @@ var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue
  *  SELECT region data for a specified regionID (fips code)
  *  Params:
  *    regionID=fips_code (required; example regionID=US11001)
+ *    source_name=fieldname for field want source metadata of
  *  Example call: http://dq-test/DQ/datasource?dataName=property.address&regionID=US11001
  */
 exports.dataSource = function(req, res){

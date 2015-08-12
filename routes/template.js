@@ -241,6 +241,7 @@ exports.fetch = function(req, res){
 exports.clear = function(req, res){
   var datetime = new Date();
   console.log(datetime + ': Running clear for specified branch in local template cache:');
+  res.setHeader('Access-Control-Allow-Origin', '*');
 
   // first make sure have required values...
   if (typeof req.query.branch === "undefined" || req.query.branch === null) {
@@ -258,8 +259,6 @@ exports.clear = function(req, res){
     console.log('  Input error: invalid passphrase.  Received: ' + passphrase );
     return res.status(404).send('Invalid authorization code');
   }
-
-  res.setHeader('Access-Control-Allow-Origin', '*');
 
   var branchFolder = '../' + process.env.LOCAL_CACHE  + '/' + branch;
   rmdir( branchFolder, function ( err, dirs, files ){
