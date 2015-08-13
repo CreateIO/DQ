@@ -5,17 +5,22 @@ var knoxCopy = require('knox-copy');
 var router = express.Router();
 
 /*
- *  This function takes the fips code for the region and forms the pathname from that needed to access
+ *  This function takes the region ID for the region and forms the pathname from that needed to access
  *  the assets for that region...
 */
-formRegionFolderName = function(fips_code) {
-  if (fips_code == 'null') {
+formRegionFolderName = function(region_id) {
+  if (region_id == 'null') {
     console.log('Using default US11001 for region');
-    fips_code = 'US11001';  // in case don't supply fips_code, default to Washington DC
+    region_id = 'US11001';  // in case don't supply region_id, default to Washington DC (COUNTY level)
   }
-  var fips_country = fips_code.substring(0,2);
-  var fips_state = fips_code.substring(0,4);
-  var fullName = process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/state/' + fips_state + '/county/' + fips_code;
+  var region_country = region_id.substring(0,2);
+  var region_state = region_id.substring(0,4);
+  var region_county = region_id.substring(0,7);
+  var fullName = process.env.S3_ASSET_FOLDER + '/country/' + region_country + '/state/' + region_state + '/county/' + region_county;
+  if (fullName.length > 7){
+    // may be a city spec name, if so, add city to path
+    fullName += '/city/' + region_id;
+  }
 
  return fullName;
 
@@ -34,9 +39,9 @@ exports.fetch = function(req, res){
   }
   var version = req.query.version;
   var type = req.query.type;
-  var fips_code = req.query.region || 'US11001';
+  var region_id = req.query.region || 'US11001';
   var datetime = new Date();
-  console.log(datetime + ': Running docURL fetch for specified propertyID: ' + propertyID + ' in region ' + fips_code);
+  console.log(datetime + ': Running docURL fetch for specified propertyID: ' + propertyID + ' in region ' + region_id);
   console.log(req.query);
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
@@ -69,7 +74,7 @@ exports.fetch = function(req, res){
         var files = [];
         var fileCount = 0;
         if (folder != '') {
-          var fullName = formRegionFolderName(fips_code) + '/imagesets-/' + folder;
+          var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
           console.log('  Located assets: ' + fullName );
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
@@ -158,9 +163,9 @@ exports.fetchAll = function(req, res){
   }
   var version = req.query.version;
   var type = req.query.type;
-  var fips_code = req.query.region || 'US11001';
+  var region_id = req.query.region || 'US11001';
   var datetime = new Date();
-  console.log(datetime + ': Running docURL fetchAll for collection of propertyID: ' + propertyIdBin + ' in region ' + fips_code);
+  console.log(datetime + ': Running docURL fetchAll for collection of propertyID: ' + propertyIdBin + ' in region ' + region_id);
   console.log(req.query);
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
@@ -192,7 +197,7 @@ exports.fetchAll = function(req, res){
         var files = [];
         var fileCount = 0;
         if (folder != '') {
-          var fullName = formRegionFolderName(fips_code) + '/imagesets-/' + folder;
+          var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
           console.log('  Located assets: ' + fullName );
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,

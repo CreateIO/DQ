@@ -53,12 +53,12 @@ function writeToCache( fs, fd, resourceFile, contents )
    });
 }
 
-function writeToLocalCache( resource, branch, fips_code, contents )
+function writeToLocalCache( resource, branch, region_id, contents )
 {
-  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + fips_code + '/template/' + resource + '.json';
+  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + region_id + '/template/' + resource + '.json';
   var fd = fs.open(resourceFile, 'w', function( err, fd ) {
       if (err){
-        var regionFolder = '../' + process.env.LOCAL_CACHE  + '/' + branch + '/' + fips_code;
+        var regionFolder = '../' + process.env.LOCAL_CACHE  + '/' + branch + '/' + region_id;
         var moreFolders = resource.split("/");  // any more folders?
         var templateFolder = regionFolder + '/template';
         console.log(moreFolders);
@@ -94,7 +94,7 @@ function writeToLocalCache( resource, branch, fips_code, contents )
 /*
  * This code reads template file from a github repository for a specific branch or tag
  */
-function readFromGitHub( res, resource, branch, fips_code, version )
+function readFromGitHub( res, resource, branch, region_id, version )
 {
   // Note: we get github values (user, token, repo, branch) from global environment specified in dq_env.sh
   var github = new Github({
@@ -102,7 +102,7 @@ function readFromGitHub( res, resource, branch, fips_code, version )
     auth: "oauth"
   });
   var repo = github.getRepo(process.env.GITHUB_OWNER, process.env.GITHUB_TEMPLATE_REPO);
-  var resourceFile = process.env.GITHUB_FOLDER + fips_code + '/template/' + resource + '.json';
+  var resourceFile = process.env.GITHUB_FOLDER + region_id + '/template/' + resource + '.json';
 
   console.log('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + branch);
   repo.read(branch, resourceFile, function(err, data) {
@@ -120,7 +120,7 @@ function readFromGitHub( res, resource, branch, fips_code, version )
             res.send(resultObject);
 
             // now that have data, cache it locally!
-            writeToLocalCache( resource, branch, fips_code, data );
+            writeToLocalCache( resource, branch, region_id, data );
         }
         catch(e) {
             console.log(e);
@@ -149,7 +149,7 @@ exports.fetch = function(req, res){
   }
   var resource = req.query.resource;
   var version = req.query.version;
-  var fips_code = req.query.region || 'US11001';                        // use DC if not specified in request
+  var region_id = req.query.region || 'US11001';                        // use DC if not specified in request
   var cacheFlag = req.query.cache || 'true';                            // use cache if not specified in request
   var branch = req.query.branch || process.env.GITHUB_TEMPLATE_BRANCH;  // use env. branch if not specified in request
 
@@ -162,13 +162,13 @@ exports.fetch = function(req, res){
 /*
  * Read file from local cache if using cache
  */
-  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + fips_code + '/template/' + resource + '.json';
+  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + region_id + '/template/' + resource + '.json';
   console.log("   file URL: " + resourceFile );
   if (cacheFlag == 'true') {
       fs.readFile(resourceFile, 'utf8', function(err,data) {
         if (err || data.length < 1) {
             // try github since file not available in local cache
-            readFromGitHub( res, resource, branch, fips_code, version );
+            readFromGitHub( res, resource, branch, region_id, version );
         }
         else {
             // return json object that corresponds to best version available within resource file
@@ -184,7 +184,7 @@ exports.fetch = function(req, res){
   else {
     // if here, don't want cached result (for dev and testing purposes)
     // go grab github file directly
-    readFromGitHub( res, resource, branch, fips_code, version );
+    readFromGitHub( res, resource, branch, region_id, version );
   }
 
 /*

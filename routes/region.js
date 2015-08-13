@@ -5,9 +5,9 @@ var AWS         = require('aws-sdk');
 var router = express.Router();
 
 /*
- *  SELECT all region data (less geometry) for a specified regionID (fips code)
+ *  SELECT all region data (less geometry) for a specified regionID (region tag)
  *  Params:
- *    regionID=regionID (required; example regionID=US11001)
+ *    regionID=region tag (required; example regionID=US11001)
  */
 exports.fetch = function(req, res){
   var regionID = req.query.regionID;
@@ -240,8 +240,8 @@ exports.find = function(req, res){
     selectString += citySelect;
   }
   if (generalName.length > 0){
-    generalSelect = "region_full_name LIKE '%" + generalName + "%' OR region_name LIKE '%" + generalName + "%' OR region_abbrev = '" + generalName + "'";
-    if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0 || citySelect.length) selectString += " OR ";
+    generalSelect = "(region_full_name LIKE '%" + generalName + "%' OR region_name LIKE '%" + generalName + "%' OR region_abbrev = '" + generalName + "')";
+    if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0 || citySelect.length) selectString += " AND ";
     selectString += generalSelect;
   }
   selectString += ";";
@@ -299,7 +299,7 @@ exports.find = function(req, res){
 };
 
 /*
- *  locate adjoining regions for a specified regionID (fips code)
+ *  locate adjoining regions for a specified regionID (region code)
  *  Params:
  *    regionID=regionID (required; example regionID=US11001)
  *    level= region level (optional, default= 2 (county level)
@@ -372,26 +372,26 @@ exports.adjacent = function(req, res){
 };
 
 /*
- *  This function takes the fips code for the region and forms the pathname from that needed to access
+ *  This function takes the region code for the region and forms the pathname from that needed to access
  *  the assets for that region...
 */
 formFolderName = function(regionID, level) {
-  var fips_country = regionID.substring(0,2);
+  var region_country = regionID.substring(0,2);
   if (level == 0) {
-    return process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/regional/';
+    return process.env.S3_ASSET_FOLDER + '/country/' + region_country + '/regional/';
   }
-  var fips_state = regionID.substring(0,4);
+  var region_state = regionID.substring(0,4);
   if (level == 1) {
-    return process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/state/' + fips_state + '/regional/';
+    return process.env.S3_ASSET_FOLDER + '/country/' + region_country + '/state/' + region_state + '/regional/';
   }
-  var fips_county = regionID.substring(0,7);
-  var fullName = process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/state/' + fips_state + '/county/' + fips_county + '/regional/';
+  var region_county = regionID.substring(0,7);
+  var fullName = process.env.S3_ASSET_FOLDER + '/country/' + region_country + '/state/' + region_state + '/county/' + region_county + '/regional/';
   if (level == 2) {
     // if here, want full local folders
     return fullName;
   }
   // if here, must want all of it, including city!
-  fullName = process.env.S3_ASSET_FOLDER + '/country/' + fips_country + '/state/' + fips_state + '/county/' + fips_county +
+  fullName = process.env.S3_ASSET_FOLDER + '/country/' + region_country + '/state/' + region_state + '/county/' + region_county +
     '/city/' + regionID + '/regional/';
   return fullName;
 };
