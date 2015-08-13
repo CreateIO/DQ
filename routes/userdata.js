@@ -4,7 +4,8 @@ var pg          = require('pg');
 var router = express.Router();
 
 /*
- *  SELECT data for a specified userdata/propertyID/region/ID
+ *  SELECT data for a specified userdata/propertyID/regionID
+ *      NOTE: ###THIS FUNCTION IS INCOMPLETE IN THAT IT IGNORES REGION AND IS SPECIFIC TO WDCEP!
  */
 exports.fetch = function(req, res){
   var propertyID = req.query.propertyID;
