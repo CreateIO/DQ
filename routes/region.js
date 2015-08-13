@@ -240,8 +240,8 @@ exports.find = function(req, res){
     selectString += citySelect;
   }
   if (generalName.length > 0){
-    generalSelect = "region_full_name LIKE '%" + generalName + "%' OR region_name LIKE '%" + generalName + "%' OR region_abbrev = '" + generalName + "'";
-    if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0 || citySelect.length) selectString += " OR ";
+    generalSelect = "(region_full_name LIKE '%" + generalName + "%' OR region_name LIKE '%" + generalName + "%' OR region_abbrev = '" + generalName + "')";
+    if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0 || citySelect.length) selectString += " AND ";
     selectString += generalSelect;
   }
   selectString += ";";
