@@ -269,7 +269,7 @@ exports.clear = function(req, res){
     }
     else {
       console.log( '   Branch ' + branchFolder + ' removed from local cache' );
-      return res.status(200).send('Branch cleared');
+      return res.status(200).send('Branch ' + branchFolder + ' cleared');
     }
   });
 };
