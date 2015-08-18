@@ -163,6 +163,7 @@ exports.locate = function(req, res){
  *    nameState = state name or abbreviation (optional)
  *    countyName = county name or abbreviation (optional)
  *    cityName = city name (optional)
+ *    level = level (0-3) of regions would like returned (optional).
  */
 exports.find = function(req, res){
   var generalName = req.query.name || '';
@@ -170,6 +171,7 @@ exports.find = function(req, res){
   var stateName = req.query.nameState || '';
   var countyName = req.query.nameCounty || '';
   var cityName = req.query.nameCity || '';
+  var level = req.query.level || -1;
   var datetime = new Date();
   console.log(datetime + ': Running region name search for specified name strings...');
   console.log(req.query);
@@ -191,6 +193,10 @@ exports.find = function(req, res){
   var citySelect = '';
   var generalSelect = '';
   var selectString = "SELECT region_id,region_full_name,region_level from region_tags WHERE "
+  if (level >= 0)
+  {
+    selectString += "region_level = '" + level + "' AND ";
+  }
 
   if (countryName.length > 0){
     countrySelect = "tag_country IN (SELECT tag_country from region_tags WHERE region_level = 0 AND (region_name = '" +
