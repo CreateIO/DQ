@@ -2,11 +2,8 @@
 #to initialize locally
 #cd to location where install repos locally...
 git clone https://www.github.com/CreateIO/DQ
-mkdir DQMatchSetsLocal
 cd DQ
-mkdir logs
-# assumes already have npm and node installed
-npm install
+./run_dq.sh
 
 #to run locally
 ./run_dq.sh
