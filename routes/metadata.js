@@ -1,5 +1,6 @@
 var express     = require('express');
 var pg          = require('pg');
+var q           = require('q');
 
 var router = express.Router();
 
@@ -20,8 +21,8 @@ var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue
 function execDataSource () {
   // get next request off queue
   var request = inQueue[0];
-  var req = request[0];
-  var res = request[1];
+  var req = request.r;
+  var res = request.s;
   var regionID = req.query.regionID || 'US11001';
   var fieldName = req.query.source_name;
   var datetime = new Date();
@@ -46,7 +47,7 @@ function execDataSource () {
         console.log(err);
         done();
         pg.end();
-        res.status(404).send('Unable to connect to DQ database');
+        request.d.reject(res.status(500).send('Unable to connect to DQ database'));
         inQueue.shift();
         if (inQueue.length>0) execDataSource();
         return;
@@ -72,7 +73,7 @@ function execDataSource () {
 //            console.log(results);
            done();
            pg.end();
-           res.json(results);
+           request.d.resolve(res.json(results));
            inQueue.shift();
            if (inQueue.length>0) execDataSource();
            return;
@@ -83,7 +84,7 @@ function execDataSource () {
             console.log(error);
             done();
             pg.end();
-            res.status(404).send('Unable to read from DQ database');
+            request.d.reject(res.status(500).send('Unable to read from DQ database'));
             inQueue.shift();
             if (inQueue.length>0) execDataSource();
             return;
@@ -108,14 +109,13 @@ function execDataSource () {
 exports.dataSource = function(req, res){
   if (typeof req.query.source_name === "undefined" || req.query.source_name === null) {
     console.log('  Input error: no source_name specified' );
-    return res.status(404).send('Missing source_name');
+    return res.status(500).send('Missing source_name');
   }
   // if here, have a valid request, add to queue...
   console.log('Adding ' + req.query.source_name + ' to dataSource queue; length = ' + inQueue.length);
-  inQueue.push([req,res]);
+  var d = q.defer();
+  inQueue.push({r:req,s:res,d:d});
   // check if this is the only request on the queue so far, if so execute it!
-  if (inQueue.length === 1) {
-    execDataSource();
-  }
-
+  if (inQueue.length===1) execDataSource();
+  return d.promise;
 };

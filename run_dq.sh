@@ -7,9 +7,9 @@ logfile="$BASEDIR/logs/DQ.log"
 log_archive="$BASEDIR/logs/run_$(timestamp).log"
 
 # Ensure we have npm before proceeding
-assert_has_program npm
+#assert_has_program npm
 # run npm install if package.json has been updated
-run_if_updated package.json npm install 
+#run_if_updated package.json npm install
 
 # Load Environment variables
 source "$BASEDIR/dq_env.sh"
