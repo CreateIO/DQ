@@ -5,9 +5,13 @@
 
 var express = require('express');
 var routes = require('./routes');
-var user = require('./routes/user');
+var docURL = require('./routes/docURL');
 var template = require('./routes/template');
 var userdata = require('./routes/userdata');
+var region = require('./routes/region');
+var metadata = require('./routes/metadata');
+var version = require('./routes/version');
+
 var http = require('http');
 var path = require('path');
 
@@ -19,7 +23,7 @@ var bodyParser = require('body-parser'),
     json = require('express-json'),
     methodOverride = require('method-override'),
     //errorHandler = require('error-handler'),
-    pg = require('pg')
+    pg = require('pg');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -45,10 +49,20 @@ app.get('/', routes.index);
 //app.get('/users', user.list);
 //app.get('/tag', tag.find);
 app.get('/DQ/template', template.fetch);
+app.get('/DQ/clearCache', template.clear);
+app.get('/DQ/docURL', docURL.fetch );
+app.get('/DQ/docCollection', docURL.fetchAll );
 app.get('/DQ/userdata', userdata.fetch);
+app.get('/DQ/regiondata', region.fetch);
+app.get('/DQ/regionasset', region.fetchAsset);
+app.get('/DQ/region', region.locate);
+app.get('/DQ/regionFind', region.find);
+app.get('/DQ/nearbyregions', region.adjacent);
+app.get('/DQ/datasource', metadata.dataSource);
+app.get('/DQ/version', version.fetch);
 
 http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+  console.log('Express DQ server, version: ' + process.env.VERSION + '; listening on port ' + app.get('port'));
 });
 
 
@@ -56,4 +70,3 @@ function errorHandler(err, req, res, next) {
   res.status(500);
   res.render('error', { error: err });
 }
-
