@@ -21,7 +21,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 
 get_hostname() {
-    echo "$1" | sed -e 's/.*\/\//g' -e 's/:/_/g' -e 's/\/.*$//'
+    echo "$1" | sed -e 's/.*\/\///g' -e 's/:/_/g' -e 's/\/.*$//'
 }
 
 dq_host=${1:-http://127.0.0.1:3000}
