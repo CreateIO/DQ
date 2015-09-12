@@ -3,6 +3,7 @@ var pg          = require('pg');
 
 var router = express.Router();
 
+var inQueue = [];   // incoming request queue
 /*
 // Temporary mock json result for data sources...
 var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue",' +
@@ -12,18 +13,15 @@ var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue
                        '"docs": [{"docName": "OTRRecord","docURL": "https: //www.taxpayerservicecenter.com/?search_type=Sales"},' +
                             '{"docName": "OTRRecord","docURL": "https: //www.taxpayerservicecenter.com/?search_type=Sales"}]}';
 */
+
 /*
- *  SELECT region data for a specified regionID (fips code)
- *  Params:
- *    regionID=region tag (required; example regionID=US11001)
- *    source_name=fieldname for field want source metadata of
- *  Example call: http://dq-test/DQ/datasource?dataName=property.address&regionID=US11001
- */
-exports.dataSource = function(req, res){
-  if (typeof req.query.source_name === "undefined" || req.query.source_name === null) {
-    console.log('  Input error: no source_name specified' );
-    return res.status(404).send('Missing source_name');
-  }
+ *  This function executes the actual source data request out of the inQueue
+*/
+function execDataSource () {
+  // get next request off queue
+  var request = inQueue[0];
+  var req = request[0];
+  var res = request[1];
   var regionID = req.query.regionID || 'US11001';
   var fieldName = req.query.source_name;
   var datetime = new Date();
@@ -48,7 +46,10 @@ exports.dataSource = function(req, res){
         console.log(err);
         done();
         pg.end();
-        return res.status(404).send('Unable to connect to DQ database');
+        res.status(404).send('Unable to connect to DQ database');
+        inQueue.shift();
+        if (inQueue.length>0) execDataSource();
+        return;
       }
       else {
         // SQL Query > Select Data
@@ -71,7 +72,10 @@ exports.dataSource = function(req, res){
 //            console.log(results);
            done();
            pg.end();
-           return res.json(results);
+           res.json(results);
+           inQueue.shift();
+           if (inQueue.length>0) execDataSource();
+           return;
         });
 
         query.on('error', function(error) {
@@ -79,11 +83,39 @@ exports.dataSource = function(req, res){
             console.log(error);
             done();
             pg.end();
-            return res.status(404).send('Unable to read from DQ database');
+            res.status(404).send('Unable to read from DQ database');
+            inQueue.shift();
+            if (inQueue.length>0) execDataSource();
+            return;
         });
 
       }
 
   });
+  // just in case, make sure process all requests
+  inQueue.shift();
+  if (inQueue.length>0) execDataSource();
+};
+
+
+/*
+ *  SELECT region data for a specified regionID (fips code)
+ *  Params:
+ *    regionID=region tag (required; example regionID=US11001)
+ *    source_name=fieldname for field want source metadata of
+ *  Example call: http://dq-test/DQ/datasource?dataName=property.address&regionID=US11001
+ */
+exports.dataSource = function(req, res){
+  if (typeof req.query.source_name === "undefined" || req.query.source_name === null) {
+    console.log('  Input error: no source_name specified' );
+    return res.status(404).send('Missing source_name');
+  }
+  // if here, have a valid request, add to queue...
+  inQueue.push([req,res]);
+  console.log('Added ' + req.query.source_name + ' to dataSource queue (length = ' + inQueue.length);
+  // check if this is the only request on the queue so far, if so execute it!
+  if (inQueue.length === 1) {
+    execDataSource();
+  }
 
 };
