@@ -55,8 +55,8 @@ svrname=$(get_hostname "${dq_host}")
 url="${dq_proto}://${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001"
 expected="${dq_proto}://${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001"
 result="curl_result.txt"
-mkdir -p "$DIR/test/target/$svrname"
-cd "$DIR/test/target/$svrname"
+mkdir -p "$bindir/test/target/$svrname"
+cd "$bindir/test/target/$svrname"
 
 rm -f "$result"
 (
