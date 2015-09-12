@@ -1,0 +1,21 @@
+
+** server side setup
+
+
+sudo apt update
+sudo apt-get install varnish
+
+edit /etc/varnish/default.vcl
+set port to 3000
+
+sudo service varnish restart
+
+edit the dq-<xxx> ELB load balancer to point to port 6081 instead of port 80
+
+
+vi /etc/default/varnish
+
+add -t 1800 to exec
+
+
+
