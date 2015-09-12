@@ -25,7 +25,7 @@ function execDataSource () {
   var regionID = req.query.regionID || 'US11001';
   var fieldName = req.query.source_name;
   var datetime = new Date();
-  console.log(datetime + ': Running data source query for ' + fieldName + ' in region: ' + regionID);
+  console.log(datetime + ': Running data source query for ' + fieldName + ' in region: ' + regionID + '; queue length = ' + inQueue.length);
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -111,8 +111,8 @@ exports.dataSource = function(req, res){
     return res.status(404).send('Missing source_name');
   }
   // if here, have a valid request, add to queue...
+  console.log('Adding ' + req.query.source_name + ' to dataSource queue; length = ' + inQueue.length);
   inQueue.push([req,res]);
-  console.log('Added ' + req.query.source_name + ' to dataSource queue (length = ' + inQueue.length);
   // check if this is the only request on the queue so far, if so execute it!
   if (inQueue.length === 1) {
     execDataSource();
