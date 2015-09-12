@@ -40,5 +40,3 @@ url="${baseurl}?region=US11001&source_name=property.numUnits"
 echo "testing $url"
 #curl -v "$url"
 ab -c "$concurrency" -t "$duration" "$url"
-
-ab -c "$concurrency" -t "$duration" "$url"
