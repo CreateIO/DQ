@@ -7,7 +7,7 @@
 #
 #
 # example:
-#   ./test/data_source_test.sh dq-test.create.io https
+#   ./test/data_source_test.sh https://dq-test.create.io
 #   ./test/data_source_test.sh localhost
 #   ./tests/andbox_tests.sh 
 #
@@ -21,22 +21,21 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 
 get_hostname() {
-    echo "$1" | sed -e 's/:/_/g' -e 's/\/.*$//'
+    echo "$1" | sed -e 's/.*\/\//g' -e 's/:/_/g' -e 's/\/.*$//'
 }
 
-dq_host=${1:-127.0.0.1:3000}
-dq_proto=${2:-http}
-concurrency=${3:-5}  # simultaneous users
-duration=${4:-10}     # in seconds
+dq_host=${1:-http://127.0.0.1:3000}
+concurrency=${2:-5}  # simultaneous users
+duration=${3:-10}     # in seconds
 
-baseurl="${dq_proto}://${dq_host}/DQ/datasource"
+baseurl="${dq_host}/DQ/datasource"
 svrname=$(get_hostname "$dq_host")
 
-mkdir -p "test/target/${svrname}"
-cd "test/target/${svrname}"
+mkdir -p "$DIR/test/target/${svrname}"
+cd "$DIR/test/target/${svrname}"
 
 url="${baseurl}?region=US11001&source_name=property.numUnits"
 #url="${baseurl}?source_name=airRights&regionID=US11001"
 echo "testing $url"
 #curl -v "$url"
-ab -c "$concurrency" -t "$duration" "$url"
+ab -c "$concurrency" -t "$duration" "$url" | tee "ab-$concurrency-$duration.txt"
