@@ -12,7 +12,7 @@
 #   ./test/source_load_test.sh http://127.0.0.1:3000 30
 #   ./test/source_load_test.sh https://dq-test.create.io
 #
-# Defaults to localhost:3000 and 10 concurrent requests
+# Defaults to http://localhost:3000 and 20 concurrent requests
 
 # Use unofficial bash strict mode: http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -eou pipefail
@@ -22,7 +22,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 . "$DIR/common.sh"
 
 dq_host=${1:-localhost:3000}
-concurrent=${2:-10}
+concurrent=${2:-20}
 
 show_header() {
     printf "code\\ttotal_s\\tdl_speed\\tdl_size\\turl_effective\\n"

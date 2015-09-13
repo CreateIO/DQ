@@ -3,15 +3,15 @@
 # sandbox_tests.sh
 #
 # syntax:
-#     ./sandbox_tests.sh [hostname[:port]]
-#
+#     ./sandbox_tests.sh  [<proto>://<hostname[:port]>] 
 #
 # example:
-#   ./test/sandbox_tests.sh dq-test.create.io https
-#   ./test/sandbox_tests.sh localhost
-#   ./tests/andbox_tests.sh 
+#   ./test/sandbox_tests.sh https://dq-test.create.io
+#   ./test/sandbox_tests.sh http://localhost:3000
+#   ./test/sandbox_tests.sh 
 #
-# Defaults to localhost:3000
+# Defaults to http://localhost:3000
+
 # Use unofficial bash strict mode: http://redsymbol.net/articles/unofficial-bash-strict-mode/
 set -eou pipefail
 IFS=$'\n\t'
