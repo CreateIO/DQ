@@ -15,8 +15,7 @@ do_curl () {
             echo "Test failed: $out: did not receive '200' status: $url" >> "$OUTFILE" 
         fi
         if ! grep -Fq "$expected" "$OUTFILE" ; then
-            echo "Test failed: $out: $url" >> "$TMPFILE"
-            echo "Expected: $expected" >> "$TMPFILE"
+            echo "Test failed: $out Expected: $expected" >> "$TMPFILE"
         fi
     else
         echo "Curl failed with exit code $?: $out: $url" >> "$TMPFILE"
