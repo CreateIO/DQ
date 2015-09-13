@@ -28,32 +28,10 @@ show_header() {
     printf "code\\ttotal_s\\tdl_speed\\tdl_size\\turl_effective\\n"
 }
 
-do_curl () {
-    url=${1:-}
-    out=${2:-}
-    expected=${3:-}
-    run=${4:-}
-    TMPFILE=$(mktemp -t sandbox_test.XXXXXXX) || exit 1
-    OUTFILE=$(mktemp -t sandbox_test.out.XXXXXXX) || exit 1
-    if curl -sL -w "%{http_code}\\t%{time_total}\\t%{speed_download}\\t%{size_download}\\t%{url_effective}\\n" "$url" -o "$out-$run.json" > "$TMPFILE" 2>&1; then
-        if ! grep -q '^200' "$TMPFILE" > /dev/null; then
-            echo "Test failed: did not receive '200' status" >> "$OUTFILE" 
-        fi
-        if ! grep -Fq "$expected" "$TMPFILE" ; then
-            echo "Test failed: test_datasource.json" >> "$OUTFILE"
-        fi
-    else
-        echo "Curl failed with exit code $?" >> "$OUTFILE"
-    fi
-    cat "$TMPFILE" "$OUTFILE"
-    rm -f "$TMPFILE" "$OUTFILE"
-}
-
-
 cd "${DIR}"
 svrname=$(get_hostname "${dq_host}")
 url="${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001"
-expected="${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001"
+expected='[{"source":"OCTO","id":897,"field_name":["airRights","property.airRights","core.airRights"]'
 result="curl_result.txt"
 mkdir -p "$DIR/target/$svrname"
 cd "$DIR/target/$svrname"
