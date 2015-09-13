@@ -60,7 +60,6 @@ exports.fetch = function(req, res){
   pg.connect(connectionDef, function(err, client, done) {
     if(err) {
       done();
-      pg.end()
       console.log(err);
       return res.json([{"status":"Error: Unable to connect to DQ database", "count":0, "fileNames":[]}]);
     }
@@ -119,7 +118,6 @@ exports.fetch = function(req, res){
             results.push({"fileNames":[], "status":"success", "count":0});       // set that have success and empty returned set in case nothing returned...
          }
         done();
-        pg.end();
         res.json(results);
       }
     };
@@ -136,6 +134,7 @@ exports.fetch = function(req, res){
 
     // After all data is returned, close connection and return results
     query.on('end', function() {
+        client.end();
         console.log('Read ' + rows + ' rows');
         console.log(results);
         getFiles( 0 );                  // sequentially go get files for each row returned
@@ -145,7 +144,6 @@ exports.fetch = function(req, res){
       //handle the error
       console.log(error);
       done();
-      pg.end();
       return res.json([{"status":"Error reading from DQ database", "count":0, "fileNames":[]}]);
     });
    });
@@ -183,7 +181,6 @@ exports.fetchAll = function(req, res){
   pg.connect(connectionDef, function(err, client, done) {
     if(err) {
       done();
-      pg.end()
       console.log(err);
       return res.json([{"fileNames":[], "status":"success", "count":0}]);
     }
@@ -242,7 +239,6 @@ exports.fetchAll = function(req, res){
             results.push({"fileNames":[], "status":"success", "count":0});       // set that have success and empty returned set in case nothing returned...
          }
         done();
-        pg.end();
         res.json(results);
       }
     };
@@ -265,6 +261,7 @@ exports.fetchAll = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
+            client.end();
             console.log('Read ' + rows + ' rows');
             console.log(results);
             getRows( ++propIDIndex );   // process next site returned
@@ -274,7 +271,6 @@ exports.fetchAll = function(req, res){
           //handle the error
           console.log(error);
           done();
-          pg.end();
           return res.json([{"status":"Error reading from DQ database", "count":0, "fileNames":[]}]);
         });
       }
