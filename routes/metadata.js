@@ -22,7 +22,7 @@ var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue
 exports.dataSource = function(req, res){
   if (typeof req.query.source_name === "undefined" || req.query.source_name === null) {
     console.log('  Input error: no source_name specified' );
-    return res.status(404).send('Missing source_name');
+    return res.status(500).send('Missing source_name');
   }
   var regionID = req.query.regionID || 'US11001';
   var fieldName = req.query.source_name;
@@ -48,7 +48,7 @@ exports.dataSource = function(req, res){
       if(err) {
         console.log(err);
         done();
-        return res.status(404).send('Unable to connect to DQ database');
+        return res.status(500).send('Unable to connect to DQ database');
       }
       else {
         // SQL Query > Select Data
@@ -76,7 +76,7 @@ exports.dataSource = function(req, res){
           //handle the error
             console.log(error);
             done();
-            return res.status(404).send('Unable to read from DQ database');
+            return res.status(500).send('Unable to read from DQ database');
         });
 
       }

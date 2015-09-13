@@ -33,7 +33,7 @@ exports.fetch = function(req, res){
       if(err) {
         console.log(err);
         done();
-        return res.status(404).send('Unable to connect to DQ database');
+        return res.status(500).send('Unable to connect to DQ database');
       }
       else {
         // SQL Query > Select Data
@@ -57,7 +57,7 @@ exports.fetch = function(req, res){
           //handle the error
             console.log(error);
             done();
-            return res.status(404).send('Unable to read from DQ database');
+            return res.status(500).send('Unable to read from DQ database');
         });
 
       }
