@@ -27,6 +27,7 @@ exports.dataSource = function(req, res){
   var regionID = req.query.regionID || 'US11001';
   var fieldName = req.query.source_name;
   var datetime = new Date();
+  
   console.log(datetime + ': Running data source query for ' + fieldName + ' in region: ' + regionID);
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -46,8 +47,6 @@ exports.dataSource = function(req, res){
     pg.connect(connectionDef, function(err, client, done) {
       if(err) {
         console.log(err);
-        done();
-        pg.end();
         return res.status(404).send('Unable to connect to DQ database');
       }
       else {
@@ -62,15 +61,13 @@ exports.dataSource = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            client.end();
-            if (rows == 0){
+            if (rows === 0){
                 console.log("INFO: requested source_name: " + fieldName + " not found in field_sources DB");
             } else {
                 console.log('Read ' + rows);
             }
 //            console.log(results);
            done();
-           pg.end();
            return res.json(results);
         });
 
@@ -78,7 +75,6 @@ exports.dataSource = function(req, res){
           //handle the error
             console.log(error);
             done();
-            pg.end();
             return res.status(404).send('Unable to read from DQ database');
         });
 
