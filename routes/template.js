@@ -109,7 +109,7 @@ function readFromGitHub( res, resource, branch, region_id, version )
     if (err) {
         // report error since could not find resource file
         console.log('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
-        res.status(404).send('Resource not found: ' + resourceFile);
+        res.status(500).send('Resource not found: ' + resourceFile);
     }
     else {
         // return json object that corresponds to best version available within resource file
@@ -124,7 +124,7 @@ function readFromGitHub( res, resource, branch, region_id, version )
         }
         catch(e) {
             console.log(e);
-            res.status(404).send('Error parsing JSON for resource: ' + resourceFile + " Error: " + e);
+            res.status(500).send('Error parsing JSON for resource: ' + resourceFile + " Error: " + e);
        }
     }
 
@@ -141,11 +141,11 @@ exports.fetch = function(req, res){
   // first make sure have required values...
   if (typeof req.query.resource === 'undefined' || req.query.resource === null) {
     console.log('  Input error: no template specified' );
-    return res.status(404).send('Missing resource');
+    return res.status(500).send('Missing resource');
   }
   if (typeof req.query.resource === 'undefined' || req.query.resource === null) {
     console.log('  Input error: no version specified' );
-    return res.status(404).send('Missing version');
+    return res.status(500).send('Missing version');
   }
   var resource = req.query.resource;
   var version = req.query.version;
@@ -199,7 +199,7 @@ exports.fetch = function(req, res){
     if (err) {
         // report error since could not find resource file
         console.log('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
-        res.status(404).send('Resource not found: ' + resourceFile);
+        res.status(500).send('Resource not found: ' + resourceFile);
     }
     else {
         // return json object that corresponds to best version available within resource file
@@ -221,7 +221,7 @@ exports.fetch = function(req, res){
     if (err) {
         // report error since could not find resource file
         console.log('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
-        res.status(404).send('Resource not found: ' + resourceFile);
+        res.status(500).send('Resource not found: ' + resourceFile);
     }
     else {
         // return json object that corresponds to best version available within resource file
@@ -246,18 +246,18 @@ exports.clear = function(req, res){
   // first make sure have required values...
   if (typeof req.query.branch === "undefined" || req.query.branch === null) {
     console.log('  Input error: no branch specified' );
-    return res.status(404).send('Missing branch');
+    return res.status(500).send('Missing branch');
   }
   if (typeof req.query.passphrase === "undefined" || req.query.passphrase === null) {
     console.log('  Input error: no passphrase specified' );
-    return res.status(404).send('Missing authorization code');
+    return res.status(500).send('Missing authorization code');
   }
   var branch = req.query.branch;
   var passphrase = req.query.passphrase
   if (passphrase != process.env.PASSPHRASE)
   {
     console.log('  Input error: invalid passphrase.  Received: ' + passphrase );
-    return res.status(404).send('Invalid authorization code');
+    return res.status(500).send('Invalid authorization code');
   }
 
   var branchFolder = '../' + process.env.LOCAL_CACHE  + '/' + branch;
@@ -265,7 +265,7 @@ exports.clear = function(req, res){
     if (err) {
       console.log( '   Error removing branch' + branchFolder + 'from local cache');
       console.log(err);
-      return res.status(404).send('Error removing branch: ' + err);
+      return res.status(500).send('Error removing branch: ' + err);
     }
     else {
       console.log( '   Branch ' + branchFolder + ' removed from local cache' );
