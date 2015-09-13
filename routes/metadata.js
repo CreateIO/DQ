@@ -1,6 +1,6 @@
 var express     = require('express');
 var pg          = require('pg');
-
+pg.defaults.poolSize = 20;
 var router = express.Router();
 
 /*
@@ -62,7 +62,8 @@ exports.dataSource = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            client.end();
+            //client.end();
+            done();
             if (rows === 0){
                 console.log("INFO: requested source_name: " + fieldName + " not found in field_sources DB");
             } else {

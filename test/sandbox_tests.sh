@@ -46,7 +46,7 @@ do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-" test_tabs_generic_
 if !(grep -q '^200' curl_result.txt); then
     echo "Test failed: did not receive '200' status"
 fi
-if !(grep -Fq '{"tabs":[{"name":"Property","tabs":[{"name":"Overview",' test_tabs_generic_novers.json); then
+if !(grep -Fq '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",' test_tabs_generic_novers.json); then
     echo "Test failed: test_tabs_generic_novers.json"
 fi
 
@@ -54,7 +54,7 @@ do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0" test
 if !(grep -q '^200' curl_result.txt); then
     echo "Test failed: did not receive '200' status"
 fi
-if !(grep -Fq '{"tabs":[{"name":"Property","tabs":[{"name":"Overview",' test_tabs_generic.json); then
+if !(grep -Fq '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",' test_tabs_generic.json); then
     echo "Test failed: test_tabs_generic.json"
 fi
 
@@ -62,7 +62,7 @@ do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branc
 if !(grep -q '^200' curl_result.txt); then
     echo "Test failed: did not receive '200' status"
 fi
-if !(grep -Fq '{"tabs":[{"name":"Property","tabs":[{"name":"Overview",' test_tabs_branch.json); then
+if !(grep -Fq '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",' test_tabs_branch.json); then
     echo "Test failed: test_tabs_branch.json"
 fi
 
