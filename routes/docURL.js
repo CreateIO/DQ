@@ -1,5 +1,6 @@
 var express     = require('express');
 var pg          = require('pg');
+pg.defaults.poolSize = 20;
 var knoxCopy = require('knox-copy');
 
 var router = express.Router();
@@ -134,7 +135,8 @@ exports.fetch = function(req, res){
 
     // After all data is returned, close connection and return results
     query.on('end', function() {
-        client.end();
+        //client.end();
+        done();
         console.log('Read ' + rows + ' rows');
         console.log(results);
         getFiles( 0 );                  // sequentially go get files for each row returned
@@ -261,7 +263,8 @@ exports.fetchAll = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            client.end();
+            //client.end();
+            done();
             console.log('Read ' + rows + ' rows');
             console.log(results);
             getRows( ++propIDIndex );   // process next site returned

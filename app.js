@@ -21,9 +21,9 @@ var bodyParser = require('body-parser'),
     favicon = require('serve-favicon'),
     logger = require('morgan'),
     json = require('express-json'),
-    methodOverride = require('method-override'),
+    //pg = require('pg'),
+    methodOverride = require('method-override');
     //errorHandler = require('error-handler'),
-    pg = require('pg');
 
 // all environments
 app.set('port', process.env.PORT || 3000);
