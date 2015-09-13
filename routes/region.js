@@ -39,7 +39,6 @@ exports.fetch = function(req, res){
       if(err) {
         console.log(err);
         done();
-        pg.end();
         return res.status(404).send('Unable to connect to DQ database');
       }
       else {
@@ -54,11 +53,9 @@ exports.fetch = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            client.end();
             console.log('Read ' + rows)
 //            console.log(results);
            done();
-           pg.end();
            return res.json(results);
         });
 
@@ -66,7 +63,6 @@ exports.fetch = function(req, res){
           //handle the error
             console.log(error);
             done();
-            pg.end();
             return res.status(404).send('Unable to read from DQ database');
         });
 
@@ -116,7 +112,6 @@ exports.locate = function(req, res){
       if(err) {
         console.log(err);
         done();
-        pg.end();
         return res.status(404).send('Unable to connect to DQ database');
       }
       else {
@@ -131,11 +126,9 @@ exports.locate = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            client.end();
             console.log('Read ' + rows)
 //            console.log(results);
            done();
-           pg.end();
            return res.json(results);
         });
 
@@ -143,7 +136,6 @@ exports.locate = function(req, res){
           //handle the error
             console.log(error);
             done();
-            pg.end();
             return res.status(404).send('Unable to read from DQ database');
         });
 
@@ -267,7 +259,6 @@ exports.find = function(req, res){
       if(err) {
         console.log(err);
         done();
-        pg.end();
         return res.status(404).send('Unable to connect to DQ database');
       }
       else {
@@ -282,11 +273,9 @@ exports.find = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            client.end();
             console.log('Read ' + rows)
 //            console.log(results);
            done();
-           pg.end();
            return res.json(results);
         });
 
@@ -294,7 +283,6 @@ exports.find = function(req, res){
           //handle the error
             console.log(error);
             done();
-            pg.end();
             return res.status(404).send('Unable to read from DQ database');
         });
 
@@ -340,7 +328,6 @@ exports.adjacent = function(req, res){
       if(err) {
         console.log(err);
         done();
-        pg.end();
         return res.status(404).send('Unable to connect to DQ database');
       }
       else {
@@ -355,11 +342,9 @@ exports.adjacent = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            client.end();
             console.log('Read ' + rows)
 //            console.log(results);
            done();
-           pg.end();
            return res.json(results);
         });
 
@@ -367,7 +352,6 @@ exports.adjacent = function(req, res){
           //handle the error
             console.log(error);
             done();
-            pg.end();
             return res.status(404).send('Unable to read from DQ database');
         });
 
