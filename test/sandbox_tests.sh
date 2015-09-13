@@ -35,13 +35,13 @@ show_header
 #do_curl "${dq_host}/DQ" root
 #do_curl "${dq_host}/DQ/" root_dir
 
-do_curl "${dq_host}/DQ/template?resource=tabs-" tabs_generic_novers \
+do_curl "${dq_host}/DQ/template?resource=tabs-&branch=master" tabs_generic_novers \
 '{"tabs":[{"name":"Property","tabs":[{"name":"Overview",'
 
-do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0" tabs_generic \
+do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=master" tabs_generic \
 '{"tabs":[{"name":"Property","tabs":[{"name":"Overview",'
 
-do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=master" tabs_branch \
+do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=test" tabs_branch \
 '{"tabs":[{"name":"Property","tabs":[{"name":"Overview",'
 
 do_curl "${dq_host}/DQ/clearCache?&branch=master&passphrase=test-Access*98765!" clear_cache \
@@ -81,7 +81,8 @@ do_curl "${dq_host}/DQ/version" fetchversion \
 'DB_HOST":"dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com","S3_ASSET_BUCKET":"create.assets","S3_ASSET'
 
 do_curl "${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001" datasource \
-'[{"source":"OCTO","id":897,"field_name":["airRights","property.airRights","core.airRights"]'
+',"field_name":["airRights","property.airRights","core.airRights"]'
+
 
 do_curl "${dq_host}/DQ/regionFind?nameState=California&nameCity=Glendale" regionname \
 '[{"region_id":"US06037_30000","region_full_name":"Glendale, CA","region_level":3}]'
