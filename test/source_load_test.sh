@@ -33,13 +33,17 @@ svrname=$(get_hostname "${dq_host}")
 url="${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001"
 expected='[{"source":"OCTO","id":897,"field_name":["airRights","property.airRights","core.airRights"]'
 result="curl_result.txt"
-mkdir -p "$DIR/target/$svrname"
-cd "$DIR/target/$svrname"
+logdir="$DIR/target/$svrname"
+mkdir -p "$logdir"
+cd "$logdir"
 
 rm -f "$result"
+errorlog="$logdir/errors.txt"
+cat /dev/null > "$errorlog"
 (
     show_header
     for run in $(seq 1 "$concurrent"); do
-        (do_curl "$url" test_datasource "$expected" "$run") &
+        (do_curl "$url" test_datasource "$expected" "$run" "$errorlog") &
     done
 ) | tee -a "$result"
+exit "$(count_test_failures)"

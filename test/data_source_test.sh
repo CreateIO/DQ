@@ -28,12 +28,15 @@ duration=${3:-10}     # in seconds
 
 baseurl="${dq_host}/DQ/datasource"
 svrname=$(get_hostname "$dq_host")
+testdir="$DIR/target/${svrname}"
 
-mkdir -p "$DIR/test/target/${svrname}"
-cd "$DIR/test/target/${svrname}"
+mkdir -p "$testdir"
+cd "$testdir"
 
 url="${baseurl}?region=US11001&source_name=property.numUnits"
 #url="${baseurl}?source_name=airRights&regionID=US11001"
 echo "testing $url"
 #curl -v "$url"
-ab -c "$concurrency" -t "$duration" "$url" | tee "ab-$concurrency-$duration.txt"
+outfile="ab-$concurrency-$duration.txt"
+ab -c "$concurrency" -t "$duration" "$url" | tee "$outfile"
+grep '^Failed requests:        0$' "$outfile" > /dev/null # exit non-zero if errors

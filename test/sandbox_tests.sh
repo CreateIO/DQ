@@ -27,8 +27,11 @@ show_header() {
 }
 
 svrname=$(get_hostname "$dq_host")
-mkdir -p "$DIR/target/$svrname"
-cd "$DIR/target/$svrname"
+testdir="$DIR/target/$svrname"
+errorlog="$testdir/errors.txt"
+mkdir -p "$testdir"
+cd "$testdir"
+cat /dev/null > "$errorlog"
 
 (
     show_header
@@ -109,3 +112,4 @@ cd "$DIR/target/$svrname"
         regionname2 \
         '{"region_id":"US39167","region_full_name":"Washington County, OH, US","region_level":2}'
 ) | tee sandbox_tests.txt
+exit "$(count_test_failures)"
