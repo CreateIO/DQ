@@ -47,9 +47,9 @@ exports.fetch = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
+            client.end();
             console.log('Read ' + rows)
 //            console.log(results);
-           done();
            return res.json(results);
         });
 
