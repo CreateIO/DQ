@@ -47,6 +47,7 @@ exports.dataSource = function(req, res){
     pg.connect(connectionDef, function(err, client, done) {
       if(err) {
         console.log(err);
+        done();
         return res.status(404).send('Unable to connect to DQ database');
       }
       else {
