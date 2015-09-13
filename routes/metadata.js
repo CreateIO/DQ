@@ -62,13 +62,13 @@ exports.dataSource = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
+            client.end();
             if (rows === 0){
                 console.log("INFO: requested source_name: " + fieldName + " not found in field_sources DB");
             } else {
                 console.log('Read ' + rows);
             }
 //            console.log(results);
-           done();
            return res.json(results);
         });
 
