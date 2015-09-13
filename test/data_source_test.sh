@@ -18,11 +18,9 @@ set -eou pipefail
 IFS=$'\n\t'
 # Credit to Stack Overflow user Dave Dopson http://stackoverflow.com/a/246128/424301
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$DIR"
+. "$DIR/common.sh"
 
-get_hostname() {
-    echo "$1" | sed -e 's/.*\/\///g' -e 's/:/_/g' -e 's/\/.*$//'
-}
+cd "$DIR"
 
 dq_host=${1:-http://127.0.0.1:3000}
 concurrency=${2:-5}  # simultaneous users
