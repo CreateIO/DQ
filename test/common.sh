@@ -19,9 +19,15 @@ do_curl () {
     expected=${3:-}
     run=${4:-test}
     errorlog=${5:-errors.txt}
+    connect_timeout=${6:-30}
+    max_time=${7:-60}
+    outputfmt="%{http_code}\\t%{time_total}\\t%{speed_download}\\t%{size_download}\\t%{url_effective}\\n"
+    outputfmt="%{http_code}\\t%{time_total}\\t%{speed_download}\\t%{size_download}\\t%{url_effective}\\n"
     TMPFILE=$(mktemp -t sandbox_test.XXXXXXX) || exit 1
     OUTFILE=$(mktemp -t sandbox_test.out.XXXXXXX) || exit 1
-    if curl -sL -w "%{http_code}\\t%{time_total}\\t%{speed_download}\\t%{size_download}\\t%{url_effective}\\n" "$url" -o "$OUTFILE" > "$TMPFILE" 2>&1; then
+    if curl -sL -w "$outputfmt" "$url" -o "$OUTFILE" \
+        --connect-timeout "$connect_timeout" --max-time "$max_time" \
+        > "$TMPFILE" 2>&1; then
         if ! grep -q '^200' "$TMPFILE" > /dev/null; then
             err="Test failed: $out: did not receive '200' status: $url"
             echo "$err" >> "$TMPFILE"
