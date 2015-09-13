@@ -20,6 +20,7 @@ do_curl () {
     else
         echo "Curl failed with exit code $?: $out: $url" >> "$TMPFILE"
     fi
-    cat "$TMPFILE" | tee "$out-$run.json"
+    cp "$OUTFILE" "$out-$run.json"
+    cat "$TMPFILE"
     rm -f "$TMPFILE" "$OUTFILE"
 }
