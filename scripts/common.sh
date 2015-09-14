@@ -120,7 +120,7 @@ timestamp() {
 please_say() {
     message=${1:-}
     if [ "$(uname)" == "Darwin" ]; then
-        say "$message"
+        say "$message" &
     else
         tput bel || true # try to beep but continue even if we cannot
     fi

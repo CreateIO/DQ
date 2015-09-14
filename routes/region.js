@@ -1,5 +1,6 @@
 var express     = require('express');
 var pg          = require('pg');
+pg.defaults.poolSize = 20;
 var AWS         = require('aws-sdk');
 
 var router = express.Router();
@@ -53,7 +54,8 @@ exports.fetch = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            client.end();
+//            client.end();
+            done();
             console.log('Read ' + rows)
 //            console.log(results);
            return res.json(results);
@@ -126,7 +128,8 @@ exports.locate = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            client.end();
+//            client.end();
+            done();
             console.log('Read ' + rows)
 //            console.log(results);
            return res.json(results);
@@ -273,7 +276,8 @@ exports.find = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-           client.end();
+//           client.end();
+            done();
             console.log('Read ' + rows)
 //            console.log(results);
            return res.json(results);
@@ -343,8 +347,9 @@ exports.adjacent = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
             console.log('Read ' + rows)
-//            console.log(results);
+//            client.end();
            done();
+//            console.log(results);
            return res.json(results);
         });
 

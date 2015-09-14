@@ -42,27 +42,27 @@ show_header
 #do_curl "${dq_proto}://${dq_host}/DQ" test_root.json
 #do_curl "${dq_proto}://${dq_host}/DQ/" test_root_dir.json
 
-do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-" test_tabs_generic_novers.json | tee curl_result.txt
+do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&branch=master" test_tabs_generic_novers.json | tee curl_result.txt
 if !(grep -q '^200' curl_result.txt); then
     echo "Test failed: did not receive '200' status"
 fi
-if !(grep -Fq '{"tabs":[{"name":"Property","tabs":[{"name":"Overview",' test_tabs_generic_novers.json); then
+if !(grep -Fq '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",' test_tabs_generic_novers.json); then
     echo "Test failed: test_tabs_generic_novers.json"
 fi
 
-do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0" test_tabs_generic.json | tee curl_result.txt
+do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=master" test_tabs_generic.json | tee curl_result.txt
 if !(grep -q '^200' curl_result.txt); then
     echo "Test failed: did not receive '200' status"
 fi
-if !(grep -Fq '{"tabs":[{"name":"Property","tabs":[{"name":"Overview",' test_tabs_generic.json); then
+if !(grep -Fq '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",' test_tabs_generic.json); then
     echo "Test failed: test_tabs_generic.json"
 fi
 
-do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=master" test_tabs_branch.json | tee curl_result.txt
+do_curl "${dq_proto}://${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=test" test_tabs_branch.json | tee curl_result.txt
 if !(grep -q '^200' curl_result.txt); then
     echo "Test failed: did not receive '200' status"
 fi
-if !(grep -Fq '{"tabs":[{"name":"Property","tabs":[{"name":"Overview",' test_tabs_branch.json); then
+if !(grep -Fq '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",' test_tabs_branch.json); then
     echo "Test failed: test_tabs_branch.json"
 fi
 
@@ -166,7 +166,7 @@ do_curl "${dq_proto}://${dq_host}/DQ/datasource?source_name=airRights&regionID=U
 if !(grep -q '^200' curl_result.txt); then
     echo "Test failed: did not receive '200' status"
 fi
-if !(grep -Fq '[{"source":"OCTO","id":897,"field_name":["airRights","property.airRights","core.airRights"]' test_datasource.json); then
+if !(grep -Fq ',"field_name":["airRights","property.airRights","core.airRights"]' test_datasource.json); then
     echo "Test failed: test_datasource.json"
 fi
 
