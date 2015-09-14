@@ -28,15 +28,8 @@ exports.fetch = function(req, res){
     "region_id, area_land, area_water FROM region_tags WHERE region_id = '" + regionID + "';";
   var results = [];
   var rows = 0;
-  var connectionDef = {
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: 5432
-  };
 
-    pg.connect(connectionDef, function(err, client, done) {
+    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
       if(err) {
         console.log(err);
         done();
@@ -102,15 +95,8 @@ exports.locate = function(req, res){
     "ST_Contains(wkb_geometry, ST_SetSRID(ST_MakePoint(" + longitude + "," + latitude + "),'4326'));";
   var results = [];
   var rows = 0;
-  var connectionDef = {
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: 5432
-  };
 
-    pg.connect(connectionDef, function(err, client, done) {
+    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
       if(err) {
         console.log(err);
         done();
@@ -250,15 +236,8 @@ exports.find = function(req, res){
 
   var results = [];
   var rows = 0;
-  var connectionDef = {
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: 5432
-  };
 
-    pg.connect(connectionDef, function(err, client, done) {
+    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
       if(err) {
         console.log(err);
         done();
@@ -320,15 +299,8 @@ exports.adjacent = function(req, res){
 		    "AND ST_Intersects(fga.wkb_geometry, fgb.wkb_geometry);";
   var results = [];
   var rows = 0;
-  var connectionDef = {
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: 5432
-  };
 
-    pg.connect(connectionDef, function(err, client, done) {
+    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
       if(err) {
         console.log(err);
         done();

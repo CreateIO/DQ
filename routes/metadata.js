@@ -32,19 +32,10 @@ exports.dataSource = function(req, res){
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-//  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
   var selectString = "select * from field_source INNER JOIN data_source USING (source) WHERE '" + fieldName + "' = ANY(field_source.field_name) AND field_source.regionid = '" + regionID + "';";
   var results = [];
   var rows = 0;
-  var connectionDef = {
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: 5432
-  };
-
-    pg.connect(connectionDef, function(err, client, done) {
+    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
       if(err) {
         console.log(err);
         done();

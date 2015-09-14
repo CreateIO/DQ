@@ -3,27 +3,31 @@
  * Module dependencies.
  */
 
+//  Node libraries
+var bodyParser = require('body-parser');
 var express = require('express');
-var routes = require('./routes');
+// var errorHandler = require('error-handler'),
+var favicon = require('serve-favicon');
+var http = require('http');
+var json = require('express-json');
+var logger = require('morgan');
+var methodOverride = require('method-override');
+var path = require('path');
+var pg = require('pg');
+
+// Config
+var config = require('./config');
+
+// Route modules
 var docURL = require('./routes/docURL');
+var metadata = require('./routes/metadata');
+var region = require('./routes/region');
+var routes = require('./routes');
 var template = require('./routes/template');
 var userdata = require('./routes/userdata');
-var region = require('./routes/region');
-var metadata = require('./routes/metadata');
 var version = require('./routes/version');
 
-var http = require('http');
-var path = require('path');
-
 var app = express();
-
-var bodyParser = require('body-parser'),
-    favicon = require('serve-favicon'),
-    logger = require('morgan'),
-    json = require('express-json'),
-    //pg = require('pg'),
-    methodOverride = require('method-override');
-    //errorHandler = require('error-handler'),
 
 // all environments
 app.set('port', process.env.PORT || 3000);
@@ -36,9 +40,8 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(methodOverride());
-// express 3.x syntax
-//app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
+app.locals.pg = config.pg;
 
 // development only
 //if ('development' == app.get('env')) {

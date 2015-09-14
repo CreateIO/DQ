@@ -16,21 +16,11 @@ exports.fetch = function(req, res){
   console.log(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-//  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
   var selectString = "SELECT * FROM wdcep_retail WHERE property_id = '" + propertyID + "' AND marketable = 'TRUE'";
   var results = [];
   var rows = 0;
-  var connectionDef = {
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: 5432
-  };
-//    var connectionString = '//DQAdmin:lEtmEinplEasE!@dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com/DQ'
-//    var connectionString = 'pg://DQAdmin:lEtmEinplEasE!@localhost:5433/DQ';
 
-    pg.connect(connectionDef, function(err, client, done) {
+    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
       if(err) {
         console.log(err);
         done();

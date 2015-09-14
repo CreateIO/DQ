@@ -1,5 +1,6 @@
 # DQ
 
+
 To initialize locally, `cd` to the location where you install repositories locally (`$HOME/src` or `$HOME/Documents` for example)
 
     cd $HOME/Documents
@@ -85,3 +86,37 @@ URL | Description
 ----|------------
 https://dq-test.create.io/DQ/template?resource=tabs-&version=1.0.0 | Normal, use local cache if available)
 https://dq-test.create.io/DQ/template?resource=tabs-&version=1.0.0&cache=false&branch=my_branch | Pull from my_branch; do not use local cache, re-grab file from git repository
+
+# Legal
+
+Copyright (C) 2015 Create, Inc. All Rights Reserved.
+
+This code is based in part on a [blog
+article](http://mherman.org/blog/2015/02/12/postgresql-and-nodejs/). The code
+from that article is available [on
+Github](https://github.com/mjhea0/node-postgres-todo/pull/4) under an 
+[MIT license](https://github.com/mjhea0/node-postgres-todo/blob/master/LICENSE):
+
+
+> The MIT License
+> 
+> Copyright (c) 2015 Michael Herman http://www.mherman.org/
+>
+> Permission is hereby granted, free of charge, to any person obtaining a copy
+> of this software and associated documentation files (the "Software"), to deal
+> in the Software without restriction, including without limitation the rights
+> to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+> copies of the Software, and to permit persons to whom the Software is
+> furnished to do so, subject to the following conditions:
+> 
+> The above copyright notice and this permission notice shall be included in
+> all copies or substantial portions of the Software.
+> 
+> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+> IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+> FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+> AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+> LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+> OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+> THE SOFTWARE.
+
