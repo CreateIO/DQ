@@ -24,5 +24,8 @@
     "rmdir": "^1.1.0",
     "router": "^1.0.0",
     "serve-favicon": "^2.2.0"
+  },
+  "devDependencies": {
+      "supervisor": "~0.7.1"
   }
 }

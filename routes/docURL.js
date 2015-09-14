@@ -1,6 +1,5 @@
 var express     = require('express');
 var pg          = require('pg');
-pg.defaults.poolSize = 20;
 var knoxCopy = require('knox-copy');
 
 var router = express.Router();
@@ -45,20 +44,10 @@ exports.fetch = function(req, res){
   console.log(datetime + ': Running docURL fetch for specified propertyID: ' + propertyID + ' in region ' + region_id);
   console.log(req.query);
 
-//  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
   var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";;
   var results = [];
   var rows = 0;
-  var connectionDef = {
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: 5432
-  };
-//    var connectionString = '//DQAdmin:lEtmEinplEasE!@dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com/DQ'
-//    var connectionString = 'pg://DQAdmin:lEtmEinplEasE!@localhost:5433/DQ';
-  pg.connect(connectionDef, function(err, client, done) {
+  pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
     if(err) {
       done();
       console.log(err);
@@ -168,19 +157,9 @@ exports.fetchAll = function(req, res){
   console.log(datetime + ': Running docURL fetchAll for collection of propertyID: ' + propertyIdBin + ' in region ' + region_id);
   console.log(req.query);
 
-//  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
   var results = [];
   var rows = 0;
-  var connectionDef = {
-    user: process.env.PG_USER,
-    password: process.env.PG_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    port: 5432
-  };
-//    var connectionString = '//DQAdmin:lEtmEinplEasE!@dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com/DQ'
-//    var connectionString = 'pg://DQAdmin:lEtmEinplEasE!@localhost:5433/DQ';
-  pg.connect(connectionDef, function(err, client, done) {
+  pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
     if(err) {
       done();
       console.log(err);
