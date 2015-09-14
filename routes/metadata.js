@@ -26,6 +26,7 @@ var mockResults = '{"abrev": "OTR","source": "Example: Office of Tax and Revenue
  *  Example call: http://dq-test/DQ/datasource?dataName=property.address&regionID=US11001
  */
 exports.dataSource = function(req, res){
+  res.setHeader("Access-Control-Allow-Origin", "*");
   if (typeof req.query.source_name === "undefined" || req.query.source_name === null) {
     console.log('  Input error: no source_name specified' );
     return res.status(500).send('Missing source_name');
@@ -36,7 +37,6 @@ exports.dataSource = function(req, res){
   
   console.log(datetime + ': Running data source query for ' + fieldName + ' in region: ' + regionID);
   console.log(req.query);
-  res.setHeader("Access-Control-Allow-Origin", "*");
 
   var selectString = "select * from field_source INNER JOIN data_source USING (source) WHERE '" + fieldName + "' = ANY(field_source.field_name) AND field_source.regionid = '" + regionID + "';";
   var results = [];
