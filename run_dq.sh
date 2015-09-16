@@ -30,4 +30,4 @@ fi
 
 # start up new instance
 nohup npm start > "$logfile" &
-please_say "DQ started in the background"
+please_say "DQ started in the background - PID $!"

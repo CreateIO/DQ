@@ -3,11 +3,12 @@
   "version": "0.0.8",
   "private": true,
   "scripts": {
-    "start": "node app.js"
+    "start": "supervisor app.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1.27",
     "body-parser": "^1.12.4",
+    "bunyan": "^1.5.1",
     "error-handler": "^1.0.0",
     "express": "^4.12.3",
     "express-json": "^1.0.0",
@@ -26,6 +27,7 @@
     "serve-favicon": "^2.2.0"
   },
   "devDependencies": {
-      "supervisor": "~0.7.1"
+    "node-inspector": "~0.12.3",
+    "supervisor": "~0.7.1"
   }
 }
