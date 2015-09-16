@@ -5,12 +5,13 @@
 
 //  Node libraries
 var bodyParser = require('body-parser');
+var bunyan = require('bunyan');
+var bunyanRequest = require('bunyan-request');
 var express = require('express');
 // var errorHandler = require('error-handler'),
 var favicon = require('serve-favicon');
 var http = require('http');
 var json = require('express-json');
-var logger = require('morgan');
 var methodOverride = require('method-override');
 var path = require('path');
 var pg = require('pg');
@@ -28,13 +29,19 @@ var userdata = require('./routes/userdata');
 var version = require('./routes/version');
 
 var app = express();
+var logger = bunyan.createLogger({name: "DQ"});
+var requestLogger = bunyanRequest({
+      logger: logger,
+      headerName: 'x-request-id'
+});
+ 
+app.use(requestLogger);
 
 // all environments
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(favicon('public/images/favicon-96x96.png'));
-app.use(logger('dev'));
 app.use(json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -42,6 +49,7 @@ app.use(bodyParser.urlencoded({
 app.use(methodOverride());
 app.use(express.static(path.join(__dirname, 'public')));
 app.locals.pg = config.pg;
+app.locals.logger = logger; 
 
 // development only
 //if ('development' == app.get('env')) {
@@ -65,7 +73,10 @@ app.get('/DQ/datasource', metadata.dataSource);
 app.get('/DQ/version', version.fetch);
 
 http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express DQ server, version: ' + process.env.VERSION + '; listening on port ' + app.get('port'));
+  logger.info({process: 'Express DQ server', 
+      version: process.env.VERSION, 
+      port: app.get('port'),
+      msg: "Server started"});
 });
 
 
