@@ -2,6 +2,7 @@
 # Source common script that has BASEDIR + run_if_updated
 source "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/scripts/common.sh
 log_dir="$BASEDIR/logs"
+run_dir="$BASEDIR/run"
 match_sets_dir="$BASEDIR/../DQMatchSetsLocal"
 logfile="$BASEDIR/logs/DQ.log"
 log_archive="$BASEDIR/logs/run_$(timestamp).log"
@@ -18,7 +19,7 @@ source "$BASEDIR/dq_env.sh"
 "$BASEDIR/scripts/kill.sh"
 
 # Ensure directories are present
-mkdir -p "$log_dir" "$match_sets_dir"
+mkdir -p "$log_dir" "$run_dir" "$match_sets_dir"
 
 # save copy of log file to file with this date
 if [[ -f "$logfile" ]]; then
@@ -30,4 +31,5 @@ fi
 
 # start up new instance
 nohup npm start > "$logfile" &
-please_say "DQ started in the background"
+echo "DQ started in the background - PID $!"
+#please_say "DQ started in the background - PID $!"

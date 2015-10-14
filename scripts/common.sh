@@ -120,10 +120,10 @@ timestamp() {
 please_say() {
     message=${1:-}
     if [ "$(uname)" == "Darwin" ]; then
-        say "$message" &
+        say "$message" & # say it in the background so we don't block the script
     else
-        tput bel || true # try to beep but continue even if we cannot
+        # try to beep, but continue silently if there is a problem beeping
+        tput bel 2> /dev/null || true 
     fi
     echo "$message"
 }
-
