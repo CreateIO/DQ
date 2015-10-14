@@ -3,7 +3,7 @@
   "version": "0.0.8",
   "private": true,
   "scripts": {
-    "start": "supervisor app.js"
+      "start": "node app.js"
   },
   "dependencies": {
     "aws-sdk": "^2.1.27",
