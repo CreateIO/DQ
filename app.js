@@ -21,6 +21,7 @@ var fs = require('fs');
 var config = require('./config');
 
 // Route modules
+var analysis = require('./routes/analysis');
 var docURL = require('./routes/docURL');
 var metadata = require('./routes/metadata');
 var region = require('./routes/region');
@@ -60,17 +61,18 @@ app.locals.logger = logger;
 app.get('/', routes.index);
 //app.get('/users', user.list);
 //app.get('/tag', tag.find);
-app.get('/DQ/template', template.fetch);
+app.get('/DQ/analysisData', analysis.fetch);
 app.get('/DQ/clearCache', template.clear);
-app.get('/DQ/docURL', docURL.fetch );
-app.get('/DQ/docCollection', docURL.fetchAll );
-app.get('/DQ/userdata', userdata.fetch);
-app.get('/DQ/regiondata', region.fetch);
-app.get('/DQ/regionasset', region.fetchAsset);
-app.get('/DQ/region', region.locate);
-app.get('/DQ/regionFind', region.find);
-app.get('/DQ/nearbyregions', region.adjacent);
 app.get('/DQ/datasource', metadata.dataSource);
+app.get('/DQ/docCollection', docURL.fetchAll );
+app.get('/DQ/docURL', docURL.fetch );
+app.get('/DQ/nearbyregions', region.adjacent);
+app.get('/DQ/region', region.locate);
+app.get('/DQ/regionasset', region.fetchAsset);
+app.get('/DQ/regiondata', region.fetch);
+app.get('/DQ/regionFind', region.find);
+app.get('/DQ/template', template.fetch);
+app.get('/DQ/userdata', userdata.fetch);
 app.get('/DQ/version', version.fetch);
 
 http.createServer(app).listen(app.get('port'), function(){
