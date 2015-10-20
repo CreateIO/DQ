@@ -53,7 +53,7 @@ exports.fetch = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
             done();
-            console.log('Read ' + rows)
+            console.log('Analysis: read ' + rows + ' rows(s)')
 //            console.log(results);
            return res.json(results);
         });

@@ -40,7 +40,7 @@ exports.fetch = function(req, res){
         query.on('end', function() {
             //client.end();
             done();
-            console.log('Read ' + rows)
+            console.log('Userdata: read ' + rows)
 //            console.log(results);
            return res.json(results);
         });

@@ -100,6 +100,10 @@ cat /dev/null > "$errorlog"
         fetchversion \
         'DB_HOST":"dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com","S3_ASSET_BUCKET":"create.assets","S3_ASSET'
 
+    do_curl "${dq_host}/DQ/analysisData?regionID=US11001&neighborhood=Adams%20Morgan" \
+        fetchAnalysis \
+        '[{"bucket_sale":"0-250K","old_land_value":62590,'
+
     do_curl "${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001" \
         datasource \
         ',"field_name":["airRights","property.airRights","core.airRights"]'
