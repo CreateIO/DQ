@@ -126,7 +126,7 @@ exports.fetch = function(req, res){
     query.on('end', function() {
         //client.end();
         done();
-        console.log('Read ' + rows + ' rows');
+        console.log('DocURL: read ' + rows + ' rows');
         console.log(results);
         getFiles( 0 );                  // sequentially go get files for each row returned
     });
@@ -244,7 +244,7 @@ exports.fetchAll = function(req, res){
         query.on('end', function() {
             //client.end();
             done();
-            console.log('Read ' + rows + ' rows');
+            console.log('DocCollection: read ' + rows + ' rows');
             console.log(results);
             getRows( ++propIDIndex );   // process next site returned
         });

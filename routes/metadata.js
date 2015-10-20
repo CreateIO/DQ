@@ -67,7 +67,7 @@ exports.dataSource = function(req, res){
             if (rows === 0){
                 console.log("INFO: requested source_name: " + fieldName + " not found in field_sources DB");
             } else {
-                console.log('Read ' + rows);
+                console.log('DataSource: read ' + rows + ' row(s)');
             }
 //            console.log(results);
            return res.json(results);

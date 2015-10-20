@@ -49,7 +49,7 @@ exports.fetch = function(req, res){
         query.on('end', function() {
 //            client.end();
             done();
-            console.log('Read ' + rows)
+            console.log('RegionData: read ' + rows + ' row(s)')
 //            console.log(results);
            return res.json(results);
         });
@@ -116,7 +116,7 @@ exports.locate = function(req, res){
         query.on('end', function() {
 //            client.end();
             done();
-            console.log('Read ' + rows)
+            console.log('RegionLocate: read ' + rows + ' row(s)')
 //            console.log(results);
            return res.json(results);
         });
@@ -257,7 +257,7 @@ exports.find = function(req, res){
         query.on('end', function() {
 //           client.end();
             done();
-            console.log('Read ' + rows)
+            console.log('RegoinFind: read ' + rows + ' row(s)')
 //            console.log(results);
            return res.json(results);
         });
@@ -318,7 +318,7 @@ exports.adjacent = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            console.log('Read ' + rows)
+            console.log('RegionData: read ' + rows + ' row(s)')
 //            client.end();
            done();
 //            console.log(results);

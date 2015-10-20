@@ -3,18 +3,14 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASEDIR="$DIR/.."
 run_dir="$BASEDIR/run"
-echo $run_dir
+#echo $run_dir
 runPID=$(cat $run_dir/DQ.pid)
-echo $runPID
+#echo $runPID
 if [ -z $runPID ]; then
     echo 'No current PID found for DQ'
 else
     echo 'attempting to kill process' $runPID
-    running=$(kill -0 $runPID)
-    echo $running
-    if [ -z "$running" ]; then
-        kill -9 $runPID
-    else
+    if ! kill -9 $runPID > /dev/null 2>&1; then
         echo 'No running process' $pid 'found'
     fi
 fi
