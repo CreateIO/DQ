@@ -32,7 +32,7 @@ function findVersion (currentVersion, templateJSON ) {
         }
     }
     return (objectResult);
-};
+}
 
 /*
  * This code writes a file to local FS
@@ -253,7 +253,7 @@ exports.clear = function(req, res){
     return res.status(500).send('Missing authorization code');
   }
   var branch = req.query.branch;
-  var passphrase = req.query.passphrase
+  var passphrase = req.query.passphrase;
   if (passphrase != process.env.PASSPHRASE)
   {
     console.log('  Input error: invalid passphrase.  Received: ' + passphrase );
