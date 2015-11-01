@@ -1,4 +1,5 @@
 var pg=require('pg');
+var bunyan=require('bunyan');
 
 // Connection strings formerly scattered in the code
 // var connectionString = '//DQAdmin:lEtmEinplEasE!@dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com/DQ'
@@ -22,7 +23,10 @@ var pg_config = {
 //   http://www.postgresql.org/docs/9.0/static/runtime-config-connection.html
 pg.defaults.poolSize = pg_config.poolSize;
 
+// Set up logging
+var logger = bunyan.createLogger({name: "DQ"});
 
 module.exports = {
-    pg: pg_config
+    pg: pg_config,
+    logger: logger
 };

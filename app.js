@@ -31,7 +31,7 @@ var userdata = require('./routes/userdata');
 var version = require('./routes/version');
 
 var app = express();
-var logger = bunyan.createLogger({name: "DQ"});
+var logger = config.logger;
 var requestLogger = bunyanRequest({
       logger: logger,
       headerName: 'x-request-id'
@@ -50,8 +50,6 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(methodOverride());
 app.use(express.static(path.join(__dirname, 'public')));
-app.locals.pg = config.pg;
-app.locals.logger = logger; 
 
 // development only
 //if ('development' == app.get('env')) {
@@ -85,13 +83,13 @@ http.createServer(app).listen(app.get('port'), function(){
 // write out our pid to a file that kill bash script will use when needed to kill us...
 var fd = fs.open('./run/DQ.pid', 'w', function( err, fd ) {
   if (err){
-    console.log('Unable to write pid to DQ.pid');
+    logger.error('Unable to write pid to DQ.pid');
   }
   else{
-   fs.write(fd, process.pid, 0, 'utf8', function(err, length, result) {
+   fs.write(fd, process.pid.toString(), 0, 'utf8', function(err, length, result) {
      if (err) {
          // report error since could not find resource file
-         console.log('An error occurred while writing pid to DQ.pid ' + err);
+         logger.error({msg: 'An error occurred while writing pid to DQ.pid ', err: err});
      }
      fs.closeSync(fd);
    });

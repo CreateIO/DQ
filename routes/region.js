@@ -1,9 +1,10 @@
 var express     = require('express');
 var pg          = require('pg');
-pg.defaults.poolSize = 20;
+var config      = require('../config');
 var AWS         = require('aws-sdk');
 
 var router = express.Router();
+var logger = config.logger;
 
 /*
  *  SELECT all region data (less geometry) for a specified regionID (region tag)
@@ -13,13 +14,17 @@ var router = express.Router();
 exports.fetch = function(req, res){
   var regionID = req.query.regionID;
   var datetime = new Date();
-  console.log(datetime + ': Running regiondata fetch for specified region ID: ' + regionID);
-  console.log(req.query);
+  logger.debug({
+      msg: 'Running regiondata fetch for specified region ID', 
+      regionId: regionID, 
+      query: req.query
+  });
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (typeof req.query.regionID === "undefined" || req.query.regionID === null) {
-    console.log('  Input error: no regionID specified' );
-    return res.status(500).send('Missing regionID');
+    var msg='Input error: Missing regionID';
+    logger.error(msg);
+    return res.status(500).send(msg);
   }
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
@@ -29,11 +34,12 @@ exports.fetch = function(req, res){
   var results = [];
   var rows = 0;
 
-    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
+    pg.connect(config.pg.connectionDef, function(err, client, done) {
       if(err) {
-        console.log(err);
         done();
-        return res.status(500).send('Unable to connect to DQ database');
+        var msg='Unable to read from DQ database';
+        logger.error({msg: msg, error: err});
+        return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
@@ -47,18 +53,18 @@ exports.fetch = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-//            client.end();
             done();
-            console.log('RegionData: read ' + rows + ' row(s)')
-//            console.log(results);
+            logger.info({msg: 'Read rows', count: rows});
+            logger.debug(results);
            return res.json(results);
         });
 
         query.on('error', function(error) {
           //handle the error
-            console.log(error);
             done();
-            return res.status(500).send('Unable to read from DQ database');
+            var msg='Unable to read from DQ database';
+            logger.error({msg: msg, error: error});
+            return res.status(500).send(msg);
         });
 
       }
@@ -76,18 +82,22 @@ exports.locate = function(req, res){
   var longitude = req.query.long;
   var latitude = req.query.lat;
   var datetime = new Date();
-  console.log(datetime + ": Running query to find region that includes given longitude=" + longitude + "; latitude=" + latitude);
-//  console.log(req.query);
+  var msg;
+  logger.info({
+      msg:'Running query to find region that includes coordinates', 
+      longitude: longitude, latitude: latitude, query: req.query});
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (typeof req.query.long === "undefined" || req.query.long === null) {
-    console.log('  Input error: no longitude (long) specified' );
-    return res.status(500).send('Missing longitude (long)');
+    msg='Input error: no longitude (long) specified';
+    logger.error(msg);
+    return res.status(500).send(msg);
   }
 
   if (typeof req.query.lat === "undefined" || req.query.lat === null) {
-    console.log('  Input error: no latitude (lat) specified' );
-    return res.status(500).send('Missing latitude (lat)');
+    msg='Input error: no latitude (lat) specified';
+    logger.error(msg);
+    return res.status(500).send(msg);
   }
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
@@ -96,11 +106,12 @@ exports.locate = function(req, res){
   var results = [];
   var rows = 0;
 
-    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
+    pg.connect(config.pg.connectionDef, function(err, client, done) {
       if(err) {
-        console.log(err);
         done();
-        return res.status(500).send('Unable to connect to DQ database');
+        var msg='Unable to connect to DQ database';
+        logger.error({msg: msg, err: err});
+        return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
@@ -114,18 +125,18 @@ exports.locate = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-//            client.end();
             done();
-            console.log('RegionLocate: read ' + rows + ' row(s)')
-//            console.log(results);
+            logger.info({msg: 'Read rows', count: rows});
+            logger.debug(results);
            return res.json(results);
         });
 
         query.on('error', function(error) {
           //handle the error
-            console.log(error);
             done();
-            return res.status(500).send('Unable to read from DQ database');
+            var msg='Unable to read from DQ database';
+            logger.info({msg: msg, error: error});
+            return res.status(500).send(msg);
         });
 
       }
@@ -153,9 +164,15 @@ exports.find = function(req, res){
   var countyName = req.query.nameCounty || '';
   var cityName = req.query.nameCity || '';
   var level = req.query.level || -1;
-  var datetime = new Date();
-  console.log(datetime + ': Running region name search for specified name strings...');
-  console.log(req.query);
+  logger.debug({
+      msg:'Running region name search for specified name strings...',
+      generalName: generalName,
+      countryName: countryName,
+      stateName: stateName,
+      countyName: countyName,
+      level: level
+  });
+  logger.info(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if ((typeof req.query.name === "undefined" || req.query.name === null) &&
@@ -163,8 +180,9 @@ exports.find = function(req, res){
     (typeof req.query.nameState === "undefined" || req.query.nameState === null) &&
     (typeof req.query.nameCounty === "undefined" || req.query.nameCounty === null) &&
     (typeof req.query.nameCity === "undefined" || req.query.nameCity === null)) {
-    console.log('  Input error: no name string(s)s specified' );
-    return res.status(500).send('Missing name string(s)');
+    var msg='Input error: no name string(s)s specified';
+    logger.error(msg);
+    return res.status(500).send(msg);
   }
 
   var regionSelect = '';
@@ -173,7 +191,7 @@ exports.find = function(req, res){
   var countySelect = '';
   var citySelect = '';
   var generalSelect = '';
-  var selectString = "SELECT region_id,region_full_name,region_level from region_tags WHERE "
+  var selectString = "SELECT region_id,region_full_name,region_level from region_tags WHERE ";
   if (level >= 0)
   {
     selectString += "region_level = '" + level + "' AND ";
@@ -232,16 +250,17 @@ exports.find = function(req, res){
     selectString += generalSelect;
   }
   selectString += ";";
-  console.log("Query: " + selectString);
+  logger.debug({query:  selectString});
 
   var results = [];
   var rows = 0;
 
-    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
+    pg.connect(config.pg.connectionDef, function(err, client, done) {
       if(err) {
-        console.log(err);
         done();
-        return res.status(500).send('Unable to connect to DQ database');
+        var msg='Unable to connect to DQ database';
+        logger.error({msg: msg, error: err});
+        return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
@@ -255,18 +274,18 @@ exports.find = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-//           client.end();
             done();
-            console.log('RegoinFind: read ' + rows + ' row(s)')
-//            console.log(results);
-           return res.json(results);
+            logger.info({msg: 'Read rows', count: rows});
+            logger.debug(results);
+            return res.json(results);
         });
 
         query.on('error', function(error) {
           //handle the error
-            console.log(error);
             done();
-            return res.status(500).send('Unable to read from DQ database');
+            msg = 'Unable to read from DQ database';
+            logger.error({msg: msg, error: error});
+            return res.status(500).send(msg);
         });
 
       }
@@ -285,13 +304,15 @@ exports.adjacent = function(req, res){
   var regionID = req.query.regionID;
   var regionLevel = req.query.level || 2;
   var datetime = new Date();
-  console.log(datetime + ': Running nearby region locate for specified region ID: ' + regionID + ' at region level: ' + regionLevel);
-  console.log(req.query);
+  var msg;
+  logger.info({msg: 'Running nearby region locate', regionID: regionID, regionLevel: regionLevel});
+  logger.debug(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (typeof req.query.regionID === "undefined" || req.query.regionID === null) {
-    console.log('  Input error: no regionID specified' );
-    return res.status(500).send('Missing regionID');
+    msg = 'Input error: no regionID specified';
+    logger.error(msg);
+    return res.status(500).send(msg);
   }
 
   var selectString = "select fgb.region_id,fgb.region_full_name from region_tags as fga, region_tags as fgb " +
@@ -300,11 +321,12 @@ exports.adjacent = function(req, res){
   var results = [];
   var rows = 0;
 
-    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
+    pg.connect(config.pg.connectionDef, function(err, client, done) {
       if(err) {
-        console.log(err);
         done();
-        return res.status(500).send('Unable to connect to DQ database');
+        msg = 'Unable to connect to DQ database';
+        logger.error({msg: msg, err: err});
+        return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
@@ -318,18 +340,18 @@ exports.adjacent = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            console.log('RegionData: read ' + rows + ' row(s)')
-//            client.end();
            done();
-//            console.log(results);
+           logger.info({msg: 'Read rows', count: rows});
+           logger.debug(results);
            return res.json(results);
         });
 
         query.on('error', function(error) {
           //handle the error
-            console.log(error);
             done();
-            return res.status(500).send('Unable to read from DQ database');
+            var msg = 'Unable to read from DQ database';
+            logger.error({msg: msg, error: err});
+            return res.status(500).send(msg);
         });
 
       }
@@ -344,7 +366,7 @@ exports.adjacent = function(req, res){
 */
 formFolderName = function(regionID, level) {
   var region_country = regionID.substring(0,2);
-  if (level == 0) {
+  if (level === 0) {
     return process.env.S3_ASSET_FOLDER + '/country/' + region_country + '/regional/';
   }
   var region_state = regionID.substring(0,4);
@@ -374,7 +396,9 @@ getAsset = function(res, s3, regionID, regionLevel, resource ) {
         if (--regionLevel < 0){
           // if here, we have exhausted all of our levels (resource not at any level)
           // report error since could not find resource file
-          console.log('Unable to locate DQ regional asset; ' + resource + ' with status: ' + err);
+          logger.error({
+              msg: 'Unable to locate DQ regional asset', 
+              resource: resource, error: err});
           res.status(500).send('Resource not found: ' + resourceFile);
         }
         else {
@@ -386,12 +410,13 @@ getAsset = function(res, s3, regionID, regionLevel, resource ) {
         // found asset, return json object that corresponds to best version available within resource file
         try {
             var jsonData = JSON.parse(data.Body);
-            //console.log(jsonData);
+            //logger.info(jsonData);
             res.send(jsonData);
         }
         catch(e) {
-            console.log(e);
-            res.status(500).send('Error parsing JSON for resource: ' + resource + " Error: " + e);
+            var msg = 'Error parsing JSON for resource: ' + resource + " Error: " + e;
+            logger.error(e);
+            res.status(500).send(msg);
         }
     }
   });
@@ -409,23 +434,25 @@ exports.fetchAsset = function(req, res){
   var regionID = req.query.region || 'US11001';
   // determine region level requesting data from by length of regionID
   var regionLevel = 0;
+  var msg;
   if (regionID.length > 2) regionLevel++;
   if (regionID.length > 4) regionLevel++;
   if (regionID.length > 7) regionLevel++;
   var resource = req.query.resource;
-  var datetime = new Date();
-  console.log(datetime + ': Running region asset fetch for specified region: ' + regionID + ' starting at region level: ' + regionLevel);
-  console.log(req.query);
+  logger.debug({msg: 'Running region asset fetch', 
+          region: regionID, regionLevel: regionLevel, query: req.query});
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (typeof req.query.region === "undefined" || req.query.region === null) {
-    console.log('  Input error: no region specified' );
-    return res.status(500).send('Missing region');
+    msg = 'Input error: no region specified';
+    logger.error(msg);
+    return res.status(500).send(msg);
   }
 
   if (typeof req.query.resource === "undefined" || req.query.resource === null) {
-    console.log('  Input error: no resource specified' );
-    return res.status(500).send('Missing resource');
+    msg = 'Input error: no resource specified';
+    logger.err(msg);
+    return res.status(500).send(msg);
   }
 
 /*
