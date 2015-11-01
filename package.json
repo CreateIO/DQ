@@ -3,7 +3,7 @@
   "version": "0.0.8",
   "private": true,
   "scripts": {
-      "start": "node app.js"
+      "start": "$(npm bin)/supervisor app.js | $(npm bin)/bunyan"
   },
   "dependencies": {
     "aws-sdk": "^2.1.27",
