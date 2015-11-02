@@ -88,7 +88,7 @@ var fd = fs.open('./run/DQ.pid', 'w', function( err, fd ) {
     console.log('Unable to write pid to DQ.pid');
   }
   else{
-   fs.write(fd, process.pid, 0, 'utf8', function(err, length, result) {
+   fs.write(fd, process.pid.toString(), 0, 'utf8', function(err, length, result) {
      if (err) {
          // report error since could not find resource file
          console.log('An error occurred while writing pid to DQ.pid ' + err);
