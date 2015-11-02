@@ -49,7 +49,7 @@ exports.fetch = function(req, res){
         query.on('end', function() {
 //            client.end();
             done();
-            console.log('RegionData: read ' + rows + ' row(s)')
+            console.log('RegionData: read ' + rows + ' row(s)');
 //            console.log(results);
            return res.json(results);
         });
@@ -116,7 +116,7 @@ exports.locate = function(req, res){
         query.on('end', function() {
 //            client.end();
             done();
-            console.log('RegionLocate: read ' + rows + ' row(s)')
+            console.log('RegionLocate: read ' + rows + ' row(s)');
 //            console.log(results);
            return res.json(results);
         });
@@ -173,7 +173,7 @@ exports.find = function(req, res){
   var countySelect = '';
   var citySelect = '';
   var generalSelect = '';
-  var selectString = "SELECT region_id,region_full_name,region_level from region_tags WHERE "
+  var selectString = "SELECT region_id,region_full_name,region_level from region_tags WHERE ";
   if (level >= 0)
   {
     selectString += "region_level = '" + level + "' AND ";
@@ -257,7 +257,7 @@ exports.find = function(req, res){
         query.on('end', function() {
 //           client.end();
             done();
-            console.log('RegoinFind: read ' + rows + ' row(s)')
+            console.log('RegoinFind: read ' + rows + ' row(s)');
 //            console.log(results);
            return res.json(results);
         });
@@ -318,7 +318,7 @@ exports.adjacent = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            console.log('RegionData: read ' + rows + ' row(s)')
+            console.log('RegionData: read ' + rows + ' row(s)');
 //            client.end();
            done();
 //            console.log(results);
@@ -344,7 +344,7 @@ exports.adjacent = function(req, res){
 */
 formFolderName = function(regionID, level) {
   var region_country = regionID.substring(0,2);
-  if (level == 0) {
+  if (level === 0) {
     return process.env.S3_ASSET_FOLDER + '/country/' + region_country + '/regional/';
   }
   var region_state = regionID.substring(0,4);

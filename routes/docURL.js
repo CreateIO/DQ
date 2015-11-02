@@ -44,7 +44,7 @@ exports.fetch = function(req, res){
   console.log(datetime + ': Running docURL fetch for specified propertyID: ' + propertyID + ' in region ' + region_id);
   console.log(req.query);
 
-  var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";;
+  var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";
   var results = [];
   var rows = 0;
   pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
@@ -62,7 +62,7 @@ exports.fetch = function(req, res){
         var folder = results[rowIndex].assets;
         var files = [];
         var fileCount = 0;
-        if (folder != '') {
+        if (folder !== '') {
           var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
           console.log('  Located assets: ' + fullName );
           var client = knoxCopy.createClient({
@@ -88,7 +88,7 @@ exports.fetch = function(req, res){
             results[rowIndex].count = fileCount;
             getFiles( ++rowIndex );   // process next site returned
           }).on('error', function(err) {
-            console.log('Encountered error on knoxCopy request:')
+            console.log('Encountered error on knoxCopy request:');
             console.log(err);
             return res.json([{"status":"Error: Unable to connect to S3 repository", "count":0, "fileNames":[]}]);
           });
@@ -103,14 +103,14 @@ exports.fetch = function(req, res){
       }
       else {
         // if here, have completed all rows (sites) returned from DB
-        if (rows == 0){
+        if (rows === 0){
             // if here, had no results, return empty set
             results.push({"fileNames":[], "status":"success", "count":0});       // set that have success and empty returned set in case nothing returned...
          }
         done();
         res.json(results);
       }
-    };
+    }
 
     // if here, connected successfully to DB
     // SQL Query > Select Data
@@ -174,7 +174,7 @@ exports.fetchAll = function(req, res){
         var folder = results[rowIndex].assets;
         var files = [];
         var fileCount = 0;
-        if (folder != '') {
+        if (folder !== '') {
           var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
           console.log('  Located assets: ' + fullName );
           var client = knoxCopy.createClient({
@@ -200,7 +200,7 @@ exports.fetchAll = function(req, res){
             results[rowIndex].count = fileCount;
             getFiles( ++rowIndex );   // process next site returned
           }).on('error', function(err) {
-            console.log('Encountered error on knoxCopy request:')
+            console.log('Encountered error on knoxCopy request:');
             console.log(err);
             return res.json([{"status":"Error: Unable to connect to S3 repository", "count":0, "fileNames":[]}]);
           });
@@ -215,14 +215,14 @@ exports.fetchAll = function(req, res){
       }
       else {
         // if here, have completed all rows (sites) returned from DB
-        if (rows == 0){
+        if (rows === 0){
             // if here, had no results, return empty set
             results.push({"fileNames":[], "status":"success", "count":0});       // set that have success and empty returned set in case nothing returned...
          }
         done();
         res.json(results);
       }
-    };
+    }
 
     // retreive rows of assets from all propertyIDs in bin
     function getRows( propIDIndex ) {
@@ -231,7 +231,7 @@ exports.fetchAll = function(req, res){
         // SQL Query > Select Data
         var propertyID = propertyIdBin[propIDIndex];
         console.log("Processing DB request for propertyID: " + propertyID);
-        var selectString = "SELECT id,property_id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";;
+        var selectString = "SELECT id,property_id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";
         var query = client.query(selectString);
 
         // Stream results back one row at a time
