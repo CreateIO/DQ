@@ -31,13 +31,17 @@ var userdata = require('./routes/userdata');
 var version = require('./routes/version');
 
 var app = express();
+
+// Logging
 var logger = config.logger;
-var requestLogger = bunyanRequest({
+// Only log detailed requests if LOG_REQUESTS is true
+if (process.env.LOG_REQUESTS === 'true') {
+  var requestLogger = bunyanRequest({
       logger: logger,
       headerName: 'x-request-id'
-});
- 
-app.use(requestLogger);
+  });
+  app.use(requestLogger);
+}
 
 // all environments
 app.set('port', process.env.PORT || 3000);
