@@ -1,8 +1,11 @@
-var express     = require('express');
-var pg          = require('pg');
+var express = require('express');
+var pg = require('pg');
 var knoxCopy = require('knox-copy');
+var config = require('../config');
+
 
 var router = express.Router();
+var logger = config.logger;
 
 /*
  *  This function takes the region ID for the region and forms the pathname from that needed to access
@@ -10,8 +13,8 @@ var router = express.Router();
 */
 formRegionFolderName = function(region_id) {
   if (region_id == 'null') {
-    console.log('Using default US11001 for region');
     region_id = 'US11001';  // in case don't supply region_id, default to Washington DC (COUNTY level)
+    logger.info({region_id: region_id, msg: 'Using default region'});
   }
   var region_country = region_id.substring(0,2);
   var region_state = region_id.substring(0,4);
@@ -41,16 +44,15 @@ exports.fetch = function(req, res){
   var type = req.query.type;
   var region_id = req.query.region || 'US11001';
   var datetime = new Date();
-  console.log(datetime + ': Running docURL fetch for specified propertyID: ' + propertyID + ' in region ' + region_id);
-  console.log(req.query);
+  logger.info({msg: 'Running docURL fetch', propertyId: propertyID, region_id: region_id});
 
   var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";
   var results = [];
   var rows = 0;
-  pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
+  pg.connect(config.pg.connectionDef, function(err, client, done) {
     if(err) {
       done();
-      console.log(err);
+      logger.error(err);
       return res.json([{"status":"Error: Unable to connect to DQ database", "count":0, "fileNames":[]}]);
     }
 
@@ -64,7 +66,7 @@ exports.fetch = function(req, res){
         var fileCount = 0;
         if (folder !== '') {
           var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
-          console.log('  Located assets: ' + fullName );
+          logger.info({msg:'Located assets', fullName: fullName});
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
             secret: process.env.KC_SECRET,
@@ -76,21 +78,20 @@ exports.fetch = function(req, res){
           }).on('data', function(key) {
             if (key.slice(-3) == type)
             {
-//              console.log(key);
+              logger.debug(key);
               files.push(key);
               fileCount++;
             }
           }).on('end', function() {
-            console.log('Processing end of knoxCopy request for iteration:' + rowIndex);
-            console.log(files);
+            logger.info({msg: 'Processing end of knoxCopy request for iteration', rowIndex: rowIndex, files: files});
             results[rowIndex].fileNames = files;
             results[rowIndex].status = "success";
             results[rowIndex].count = fileCount;
             getFiles( ++rowIndex );   // process next site returned
           }).on('error', function(err) {
-            console.log('Encountered error on knoxCopy request:');
-            console.log(err);
-            return res.json([{"status":"Error: Unable to connect to S3 repository", "count":0, "fileNames":[]}]);
+            var msg = {"status":"Error: Unable to connect to S3 repository on knoxCopy request", "count":0, "fileNames":[], err:err};
+            logger.error(msg);
+            return res.json(msg);
           });
         }
         else {
@@ -126,14 +127,13 @@ exports.fetch = function(req, res){
     query.on('end', function() {
         //client.end();
         done();
-        console.log('DocURL: read ' + rows + ' rows');
-        console.log(results);
+        logger.debug({msg: 'Read rows', count: rows, results: results});
         getFiles( 0 );                  // sequentially go get files for each row returned
     });
 
     query.on('error', function(error) {
       //handle the error
-      console.log(error);
+      logger.error(error);
       done();
       return res.json([{"status":"Error reading from DQ database", "count":0, "fileNames":[]}]);
     });
@@ -154,15 +154,15 @@ exports.fetchAll = function(req, res){
   var type = req.query.type;
   var region_id = req.query.region || 'US11001';
   var datetime = new Date();
-  console.log(datetime + ': Running docURL fetchAll for collection of propertyID: ' + propertyIdBin + ' in region ' + region_id);
-  console.log(req.query);
+  logger.info(datetime + ': Running docURL fetchAll for collection of propertyID: ' + propertyIdBin + ' in region ' + region_id);
+  logger.info(req.query);
 
   var results = [];
   var rows = 0;
-  pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
+  pg.connect(config.pg.connectionDef, function(err, client, done) {
     if(err) {
       done();
-      console.log(err);
+      logger.error(err);
       return res.json([{"fileNames":[], "status":"success", "count":0}]);
     }
 
@@ -176,7 +176,7 @@ exports.fetchAll = function(req, res){
         var fileCount = 0;
         if (folder !== '') {
           var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
-          console.log('  Located assets: ' + fullName );
+          logger.info({msg: 'Located assets', fullName: fullName});
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
             secret: process.env.KC_SECRET,
@@ -188,20 +188,20 @@ exports.fetchAll = function(req, res){
           }).on('data', function(key) {
             if (key.slice(-3) == type)
             {
-//              console.log(key);
+              logger.debug(key);
               files.push(key);
               fileCount++;
             }
           }).on('end', function() {
-            console.log('Processing end of knoxCopy request for iteration:' + rowIndex);
-            console.log(files);
+            logger.info({msg: 'Processing end of knoxCopy request', 
+                iteration:  rowIndex, 
+                files: files});
             results[rowIndex].fileNames = files;
             results[rowIndex].status = "success";
             results[rowIndex].count = fileCount;
             getFiles( ++rowIndex );   // process next site returned
           }).on('error', function(err) {
-            console.log('Encountered error on knoxCopy request:');
-            console.log(err);
+            logger.error({msg: 'Encountered error on knoxCopy request', err: err});
             return res.json([{"status":"Error: Unable to connect to S3 repository", "count":0, "fileNames":[]}]);
           });
         }
@@ -230,7 +230,7 @@ exports.fetchAll = function(req, res){
         // if here, have another propertyID to process
         // SQL Query > Select Data
         var propertyID = propertyIdBin[propIDIndex];
-        console.log("Processing DB request for propertyID: " + propertyID);
+        logger.info("Processing DB request for propertyID: " + propertyID);
         var selectString = "SELECT id,property_id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";
         var query = client.query(selectString);
 
@@ -244,14 +244,14 @@ exports.fetchAll = function(req, res){
         query.on('end', function() {
             //client.end();
             done();
-            console.log('DocCollection: read ' + rows + ' rows');
-            console.log(results);
+            logger.info({msg: 'Read rows', count: rows });
+            logger.debug(results);
             getRows( ++propIDIndex );   // process next site returned
         });
 
         query.on('error', function(error) {
           //handle the error
-          console.log(error);
+          logger.error(error);
           done();
           return res.json([{"status":"Error reading from DQ database", "count":0, "fileNames":[]}]);
         });

@@ -102,7 +102,7 @@ cat /dev/null > "$errorlog"
 
     do_curl "${dq_host}/DQ/analysisData?regionID=US11001&neighborhood=Adams%20Morgan" \
         fetchAnalysis \
-        '[{"bucket_sale":"0-250K","old_land_value":62590,'
+        '[{"bkt_sale":"0-250K","fin_land_old_land_value":'
 
     do_curl "${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001" \
         datasource \

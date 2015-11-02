@@ -1,9 +1,10 @@
 {
   "name": "createDQ",
-  "version": "0.0.8",
+  "version": "1.4.2",
   "private": true,
   "scripts": {
-      "start": "node app.js"
+    "start": "node app.js",
+    "start-dev": "$(npm bin)/supervisor app.js | $(npm bin)/bunyan"
   },
   "dependencies": {
     "aws-sdk": "^2.1.27",

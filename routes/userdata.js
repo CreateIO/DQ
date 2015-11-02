@@ -1,8 +1,9 @@
 var express     = require('express');
 var pg          = require('pg');
-pg.defaults.poolSize = 20;
+var config      = require('../config');
 
 var router = express.Router();
+var logger = config.logger;
 
 /*
  *  SELECT data for a specified userdata/propertyID/regionID
@@ -12,19 +13,21 @@ exports.fetch = function(req, res){
   var propertyID = req.query.propertyID;
   var version = req.query.version;
   var datetime = new Date();
-  console.log(datetime + ': Running userdata fetch for specified propertyID: ' + propertyID);
-  console.log(req.query);
+  logger.info({msg: 'Running userdata fetch', propertyID: propertyID});
+  logger.debug(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   var selectString = "SELECT * FROM wdcep_retail WHERE property_id = '" + propertyID + "' AND marketable = 'TRUE'";
   var results = [];
   var rows = 0;
+  var msg;
 
-    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
+    pg.connect(config.pg.connectionDef, function(err, client, done) {
       if(err) {
-        console.log(err);
         done();
-        return res.status(500).send('Unable to connect to DQ database');
+        msg = 'Unable to connect to DQ database';
+        logger.error({ msg: msg, err: err});
+        return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
@@ -38,18 +41,18 @@ exports.fetch = function(req, res){
 
         // After all data is returned, close connection and return results
         query.on('end', function() {
-            //client.end();
             done();
-            console.log('Userdata: read ' + rows);
-//            console.log(results);
-           return res.json(results);
+            logger.info({msg: 'Read rows', count: rows});
+            logger.debug(results);
+            return res.json(results);
         });
 
         query.on('error', function(error) {
           //handle the error
-            console.log(error);
             done();
-            return res.status(500).send('Unable to read from DQ database');
+            msg='Unable to read from DQ database';
+            logger.error({msg: msg, error: error});
+            return res.status(500).send(msg);
         });
 
       }

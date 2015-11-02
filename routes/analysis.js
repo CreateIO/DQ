@@ -1,9 +1,10 @@
 var express     = require('express');
 var pg          = require('pg');
-pg.defaults.poolSize = 20;
 var AWS         = require('aws-sdk');
+var config      = require('../config');
 
 var router = express.Router();
+var logger = config.logger;
 
 /*
  *  SELECT all analysis data regionID (region tag) and neighborhood
@@ -15,18 +16,21 @@ exports.fetch = function(req, res){
   var regionID = req.query.regionID;
   var neighborhood = req.query.neighborhood;
   var datetime = new Date();
-  console.log(datetime + ': Running analysis fetch for specified region ID: ' + regionID + ' and neighborhood ' + neighborhood);
-  console.log(req.query);
+  var msg;
+  logger.info({msg: 'Running analysis fetch', regionID: regionID, neighborhood: neighborhood});
+  logger.debug(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (typeof req.query.regionID === "undefined" || req.query.regionID === null) {
-    console.log('  Input error: no regionID specified' );
-    return res.status(500).send('Missing regionID');
+    msg = 'Input error: no regionID specified';
+    logger.error(msg);
+    return res.status(500).send(msg);
   }
 
   if (typeof req.query.neighborhood === "undefined" || req.query.neighborhood === null) {
-    console.log('  Input error: no neighborhood specified' );
-    return res.status(500).send('Missing neighborhood');
+    msg = 'Input error: no neighborhood specified';
+    logger.error(msg);
+    return res.status(500).send(msg);
   }
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
@@ -34,11 +38,12 @@ exports.fetch = function(req, res){
   var results = [];
   var rows = 0;
 
-    pg.connect(req.app.locals.pg.connectionDef, function(err, client, done) {
+    pg.connect(config.pg.connectionDef, function(err, client, done) {
       if(err) {
-        console.log(err);
         done();
-        return res.status(500).send('Unable to connect to DQ database');
+        var msg = 'Unable to connect to DQ database';
+        logger.error(msg);
+        return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
@@ -53,16 +58,17 @@ exports.fetch = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
             done();
-            console.log('Analysis: read ' + rows + ' rows(s)');
-//            console.log(results);
-           return res.json(results);
+            logger.info({msg: 'Read rows', count: rows});
+            logger.debug(results);
+            return res.json(results);
         });
 
         query.on('error', function(error) {
           //handle the error
-            console.log(error);
             done();
-            return res.status(500).send('Unable to read from DQ database');
+            var msg = 'Unable to connect to DQ database';
+            logger.error(msg);
+            return res.status(500).send(msg);
         });
 
       }

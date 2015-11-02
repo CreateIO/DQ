@@ -8,19 +8,15 @@ To initialize locally, `cd` to the location where you install repositories local
     cd DQ
     ./run_dq.sh
 
-# Run locally in the background
+# Run locally for development (runs the DQ in supervisor mode) in the background
+    ./run_dq.sh dev
 
-    ./run_dq.sh
 
-#Run in foreground: 
-    source ./dq_env.sh
-    npm start
-
-## Stop DQ server
+## Stop DQ server (note: running ./run_dq.sh will automatically kill the running instance prior to restrarting it)
 
 If you used the `run_dq.sh` script to start it:
-**(warning: assumes you don't have other node processes running, like local TRex or create server)**:
-    killall node
+    ./scripts/kill.sh
+
 
 # Steps for installation on ubuntu server
     cd /data
@@ -63,14 +59,9 @@ and restart lighttpd
     source ./dq_env.sh
 	npm start
 
-## To run in the background on ubuntu
+## To run in the background on ubuntu (NOT in supervisor mode so can kill cleanly if needed)
     cd /data/DQ/DQ
-    source ./dq_env.sh
-	nohup npm start > logs/DQ.log &
-
-## OR USE SCRIPTS (best choice)!
-    cd /data/DQ/DQ
-	./run_dq.sh
+    ./run_dq.sh
 
 #DQMatchSet repository fetches:
 
