@@ -35,7 +35,7 @@ if ([ $# -lt 1 ] || [ "$1" != "dev" ]); then
     nohup npm start > "$logfile" &
     echo "DQ started in the background - PID $!"
 else
-    nohup npm start_dev > "$logfile" &
+    nohup npm run start-dev > "$logfile" &
     echo "DQ (supervisor mode for development) started in the background - PID $!"
 fi
 #please_say "DQ started in the background - PID $!"
