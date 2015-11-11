@@ -166,113 +166,19 @@ exports.fetch = function(req, res){
  */
   var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + region_id + '/template/' + resource + '.json';
   logger.info("   file URL: " + resourceFile );
-  if (cacheFlag == 'true') {
-      fs.readFile(resourceFile, 'utf8', function(err,data) {
-        if (err || data.length < 1) {
-            // try github since file not available in local cache
-            readFromGitHub( res, resource, branch, region_id, version );
-        }
-        else {
-            // return json object that corresponds to best version available within resource file
-            // NOTE: since this is cached, we know that the JSON.parse will never throw an error here
-            var jsonData = JSON.parse(data);
-//            logger.info(jsonData);
-            var resultObject = findVersion(version, jsonData.versions);
-        //    logger.info(resultObject);
-            res.send(resultObject);
-        }
-      });
-  }
-  else {
-    // if here, don't want cached result (for dev and testing purposes)
-    // go grab github file directly
-    readFromGitHub( res, resource, branch, region_id, version );
-  }
-
-/*
- * This code reads template file from remote s3 repository
- *
-
-//  var s3base = "http://s3.amazonaws.com/io.create/phillyvi-test-2/dqmatchsets/template/";
-  var resourceFile = 'phillyvi-test-2/dqmatchsets/template/' + resource + '.json'
-  var s3 = new AWS.S3();
-  var params = {Bucket: process.env.S3_BUCKET, Key: resourceFile };
-  var s3file = s3.getObject(params, function(err, data) {
-    if (err) {
-        // report error since could not find resource file
-        logger.info('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
-        res.status(500).send('Resource not found: ' + resourceFile);
-    }
-    else {
-        // return json object that corresponds to best version available within resource file
-        var jsonData = JSON.parse(data.Body);
-        logger.info(jsonData);
-        var resultObject = findVersion(version, jsonData.versions);
-    //    logger.info(resultObject);
-        res.send(resultObject);
-    }
-
-  });
-
-/*
- * This code reads template file from local storage
- *
-  var resourceFile = '../DQMatchSets/template/' + resource + '.json';
-  logger.info("   file URL: " + resourceFile );
   fs.readFile(resourceFile, 'utf8', function(err,data) {
-    if (err) {
-        // report error since could not find resource file
-        logger.info('An error occurred while fetching DQ template resource ' + resource + ' with status: ' + err);
-        res.status(500).send('Resource not found: ' + resourceFile);
+    if (err || data.length < 1) {
+        // try github since file not available in local cache
+        readFromGitHub( res, resource, branch, region_id, version );
     }
     else {
         // return json object that corresponds to best version available within resource file
+        // NOTE: since this is cached, we know that the JSON.parse will never throw an error here
         var jsonData = JSON.parse(data);
-        logger.info(jsonData);
+//            logger.info(jsonData);
         var resultObject = findVersion(version, jsonData.versions);
     //    logger.info(resultObject);
         res.send(resultObject);
     }
   });
-*/
 };
-
-/*
- *  Clear local cache for the specified branch data.  This will force a clean fetch from github for all template resources
- */
-exports.clear = function(req, res){
-  var datetime = new Date();
-  logger.info(datetime + ': Running clear for specified branch in local template cache:');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-
-  // first make sure have required values...
-  if (typeof req.query.branch === "undefined" || req.query.branch === null) {
-    logger.info('  Input error: no branch specified' );
-    return res.status(500).send('Missing branch');
-  }
-  if (typeof req.query.passphrase === "undefined" || req.query.passphrase === null) {
-    logger.info('  Input error: no passphrase specified' );
-    return res.status(500).send('Missing authorization code');
-  }
-  var branch = req.query.branch;
-  var passphrase = req.query.passphrase;
-  if (passphrase != process.env.PASSPHRASE)
-  {
-    logger.info('  Input error: invalid passphrase.  Received: ' + passphrase );
-    return res.status(500).send('Invalid authorization code');
-  }
-
-  var branchFolder = '../' + process.env.LOCAL_CACHE  + '/' + branch;
-  rmdir( branchFolder, function ( err, dirs, files ){
-    if (err) {
-      logger.info( '   Error removing branch' + branchFolder + 'from local cache');
-      logger.info(err);
-      return res.status(500).send('Error removing branch: ' + err);
-    }
-    else {
-      logger.info( '   Branch ' + branchFolder + ' removed from local cache' );
-      return res.status(200).send('Branch ' + branchFolder + ' cleared');
-    }
-  });
-};
-
