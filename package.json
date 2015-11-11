@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "aws-sdk": "^2.1.27",
+    "aws-snsclient": "^0.2.0",
     "body-parser": "^1.12.4",
     "bunyan": "^1.5.1",
     "bunyan-request": "^1.2.0",
