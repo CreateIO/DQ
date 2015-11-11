@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export VERSION="1.4.2"
+export VERSION="1.4.4"
 
 #postgres dq
 export DB_HOST="dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com"
@@ -14,7 +14,7 @@ export PG_PASSWORD="ty2015!letmein*"
 export KC_KEY="AKIAI2NVER2KEZ67CZFQ"
 export KC_SECRET="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"
 
-#aws-skd values to access s3
+#aws-sdk values to access s3
 export AWS_ACCESS_KEY_ID="AKIAI44SSOEPHQGAMKGA"
 export AWS_SECRET_ACCESS_KEY="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"
 export AWS_REGION="us-east-1"
@@ -22,6 +22,10 @@ export AWS_REGION="us-east-1"
 #s3 buckets
 export S3_ASSET_BUCKET="create.assets"
 export S3_ASSET_FOLDER="regional_assets"
+
+#aws-sdk topic for github notifications
+export AWS_SNS_TOPIC="arn:aws:sns:us-east-1:249035392509:GithubDQMatchSetsUpdateReport"
+export AWS_SQS_URL="https://sqs.us-east-1.amazonaws.com/249035392509/DQMatchSets-trex2"
 
 #Github
 export GITHUB_OWNER="CreateIO"

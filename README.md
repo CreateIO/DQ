@@ -40,6 +40,9 @@ If you used the `run_dq.sh` script to start it:
     # make sure that the environment file (dq_env.sh) is pointing to the production branch:
     export GITHUB_TEMPLATE_BRANCH="test" (for dq-test.create.io server instance on TRex3 or TRex4)
     export GITHUB_TEMPLATE_BRANCH="prod" (for dq.create.io server instance on TRex prod2 or TRex5)
+    # make sure there is an AWS SQS queue for the server (they have been created for trex2 through trex5) -- in AWS console SQS settings
+    # make sure that the URL for the server correctly matchs the AWS_SQS_URL configured for that server (change trex2 to server as required):
+    export AWS_SQS_URL="https://sqs.us-east-1.amazonaws.com/249035392509/DQMatchSets-trex2"
 	#use sudo vim dq_env.sh to change above line if required
 
 ## Set up routing for server

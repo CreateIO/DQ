@@ -16,7 +16,6 @@ var methodOverride = require('method-override');
 var path = require('path');
 var pg = require('pg');
 var fs = require('fs');
-
 // Config
 var config = require('./config');
 
@@ -29,6 +28,7 @@ var routes = require('./routes');
 var template = require('./routes/template');
 var userdata = require('./routes/userdata');
 var version = require('./routes/version');
+var githubCache = require('./routes/githubCache');
 
 var app = express();
 
@@ -64,7 +64,7 @@ app.get('/', routes.index);
 //app.get('/users', user.list);
 //app.get('/tag', tag.find);
 app.get('/DQ/analysisData', analysis.fetch);
-app.get('/DQ/clearCache', template.clear);
+app.get('/DQ/clearCache', githubCache.clear);
 app.get('/DQ/datasource', metadata.dataSource);
 app.get('/DQ/docCollection', docURL.fetchAll );
 app.get('/DQ/docURL', docURL.fetch );
@@ -99,6 +99,16 @@ var fd = fs.open('./run/DQ.pid', 'w', function( err, fd ) {
    });
  }
 });
+
+// setup polling for AWS SQS in background...
+var task_is_running = false;
+setInterval(function(){
+    if(!task_is_running){
+        task_is_running = true;
+        githubCache.pollSQS();
+        task_is_running = false;
+    }
+}, 5000);   // perform poll every 10 seconds
 
 function errorHandler(err, req, res, next) {
   res.status(500);
