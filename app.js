@@ -81,7 +81,7 @@ http.createServer(app).listen(app.get('port'), function(){
   logger.info({process: 'Express DQ server', 
       version: process.env.VERSION, 
       port: app.get('port'),
-      msg: "Server started"});
+      message: 'Server started'});
 });
 
 // write out our pid to a file that kill bash script will use when needed to kill us...

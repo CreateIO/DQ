@@ -13,11 +13,11 @@ exports.fetch = function(req, res){
   var propertyID = req.query.propertyID;
   var version = req.query.version;
   var datetime = new Date();
-  logger.info({msg: 'Running userdata fetch', propertyID: propertyID});
+  logger.info({message: 'Running userdata fetch', propertyID: propertyID});
   logger.debug(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
-  var selectString = "SELECT * FROM wdcep_retail WHERE property_id = '" + propertyID + "' AND marketable = 'TRUE'";
+  var selectString = "SELECT * FROM wdcep_retail WHERE property_id = $1 AND marketable = 'TRUE'";
   var results = [];
   var rows = 0;
   var msg;
@@ -26,12 +26,12 @@ exports.fetch = function(req, res){
       if(err) {
         done();
         msg = 'Unable to connect to DQ database';
-        logger.error({ msg: msg, err: err});
+        logger.error({ message: msg, err: err});
         return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
-        var query = client.query(selectString);
+        var query = client.query(selectString,[propertyID]);
 
         // Stream results back one row at a time
         query.on('row', function(row) {
@@ -42,8 +42,8 @@ exports.fetch = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
             done();
-            logger.info({msg: 'Read rows', count: rows});
-            logger.debug(results);
+//            logger.info({message: 'Read rows', count: rows});
+//            logger.debug(results);
             return res.json(results);
         });
 
@@ -51,7 +51,7 @@ exports.fetch = function(req, res){
           //handle the error
             done();
             msg='Unable to read from DQ database';
-            logger.error({msg: msg, error: error});
+            logger.error({message: msg, error: error});
             return res.status(500).send(msg);
         });
 

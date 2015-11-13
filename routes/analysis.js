@@ -17,7 +17,7 @@ exports.fetch = function(req, res){
   var neighborhood = req.query.neighborhood;
   var datetime = new Date();
   var msg;
-  logger.info({msg: 'Running analysis fetch', regionID: regionID, neighborhood: neighborhood});
+  logger.info({message: 'Running analysis fetch', regionID: regionID, neighborhood: neighborhood});
   logger.debug(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -34,7 +34,7 @@ exports.fetch = function(req, res){
   }
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
-  var selectString = "SELECT * FROM analysis WHERE region_tag = '" + regionID + "' AND nbhd = '" + neighborhood + "';";
+  var selectString = "SELECT * FROM analysis WHERE region_tag = $1 AND nbhd = $2;";
   var results = [];
   var rows = 0;
 
@@ -47,7 +47,7 @@ exports.fetch = function(req, res){
       }
       else {
         // SQL Query > Select Data
-        var query = client.query(selectString);
+        var query = client.query(selectString, [regionID,neighborhood]);
 
         // Stream results back one row at a time
         query.on('row', function(row) {
@@ -58,7 +58,7 @@ exports.fetch = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
             done();
-            logger.info({msg: 'Read rows', count: rows});
+            logger.info({message: 'Read rows', count: rows});
             logger.debug(results);
             return res.json(results);
         });

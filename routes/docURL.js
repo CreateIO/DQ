@@ -14,7 +14,7 @@ var logger = config.logger;
 formRegionFolderName = function(region_id) {
   if (region_id == 'null') {
     region_id = 'US11001';  // in case don't supply region_id, default to Washington DC (COUNTY level)
-    logger.info({region_id: region_id, msg: 'Using default region'});
+    logger.info({region_id: region_id, message: 'Using default region'});
   }
   var region_country = region_id.substring(0,2);
   var region_state = region_id.substring(0,4);
@@ -44,9 +44,9 @@ exports.fetch = function(req, res){
   var type = req.query.type;
   var region_id = req.query.region || 'US11001';
   var datetime = new Date();
-  logger.info({msg: 'Running docURL fetch', propertyId: propertyID, region_id: region_id});
+  logger.info({message: "Running docURL fetch", propertyId: propertyID, region_id: region_id});
 
-  var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";
+  var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = $1 AND marketable = 'TRUE'";
   var results = [];
   var rows = 0;
   pg.connect(config.pg.connectionDef, function(err, client, done) {
@@ -66,7 +66,7 @@ exports.fetch = function(req, res){
         var fileCount = 0;
         if (folder !== '') {
           var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
-          logger.info({msg:'Located assets', fullName: fullName});
+          logger.info({message:'Located assets', fullName: fullName});
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
             secret: process.env.KC_SECRET,
@@ -83,13 +83,13 @@ exports.fetch = function(req, res){
               fileCount++;
             }
           }).on('end', function() {
-            logger.info({msg: 'Processing end of knoxCopy request for iteration', rowIndex: rowIndex, files: files});
+            logger.info({message: 'Processing end of knoxCopy request for iteration', rowIndex: rowIndex, files: files});
             results[rowIndex].fileNames = files;
             results[rowIndex].status = "success";
             results[rowIndex].count = fileCount;
             getFiles( ++rowIndex );   // process next site returned
           }).on('error', function(err) {
-            var msg = {"status":"Error: Unable to connect to S3 repository on knoxCopy request", "count":0, "fileNames":[], err:err};
+            var msg = {status:"Error: Unable to connect to S3 repository on knoxCopy request", "count":0, "fileNames":[], err:err};
             logger.error(msg);
             return res.json(msg);
           });
@@ -115,7 +115,7 @@ exports.fetch = function(req, res){
 
     // if here, connected successfully to DB
     // SQL Query > Select Data
-    var query = client.query(selectString);
+    var query = client.query(selectString, [propertyID]);
 
     // Stream results back one row at a time
     query.on('row', function(row) {
@@ -127,7 +127,7 @@ exports.fetch = function(req, res){
     query.on('end', function() {
         //client.end();
         done();
-        logger.debug({msg: 'Read rows', count: rows, results: results});
+        logger.debug({message: "Read rows", count: rows, results: results});
         getFiles( 0 );                  // sequentially go get files for each row returned
     });
 
@@ -154,7 +154,7 @@ exports.fetchAll = function(req, res){
   var type = req.query.type;
   var region_id = req.query.region || 'US11001';
   var datetime = new Date();
-  logger.info(datetime + ': Running docURL fetchAll for collection of propertyID: ' + propertyIdBin + ' in region ' + region_id);
+  logger.info({message: 'Running docURL fetchAll for collection', propertyIDBin: propertyIdBin, region: region_id});
   logger.info(req.query);
 
   var results = [];
@@ -176,7 +176,7 @@ exports.fetchAll = function(req, res){
         var fileCount = 0;
         if (folder !== '') {
           var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
-          logger.info({msg: 'Located assets', fullName: fullName});
+          logger.info({message: 'Located assets', fullName: fullName});
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
             secret: process.env.KC_SECRET,
@@ -193,7 +193,7 @@ exports.fetchAll = function(req, res){
               fileCount++;
             }
           }).on('end', function() {
-            logger.info({msg: 'Processing end of knoxCopy request', 
+            logger.info({message: 'Processing end of knoxCopy request',
                 iteration:  rowIndex, 
                 files: files});
             results[rowIndex].fileNames = files;
@@ -201,7 +201,7 @@ exports.fetchAll = function(req, res){
             results[rowIndex].count = fileCount;
             getFiles( ++rowIndex );   // process next site returned
           }).on('error', function(err) {
-            logger.error({msg: 'Encountered error on knoxCopy request', err: err});
+            logger.error({message: 'Encountered error on knoxCopy request', err: err});
             return res.json([{"status":"Error: Unable to connect to S3 repository", "count":0, "fileNames":[]}]);
           });
         }
@@ -231,8 +231,8 @@ exports.fetchAll = function(req, res){
         // SQL Query > Select Data
         var propertyID = propertyIdBin[propIDIndex];
         logger.info("Processing DB request for propertyID: " + propertyID);
-        var selectString = "SELECT id,property_id,wdceppage AS assets FROM wdcep_retail where property_id = '" + propertyID + "' AND marketable = 'TRUE'";
-        var query = client.query(selectString);
+        var selectString = "SELECT id,property_id,wdceppage AS assets FROM wdcep_retail where property_id = $1 AND marketable = 'TRUE'";
+        var query = client.query(selectString, [propertyID]);
 
         // Stream results back one row at a time
         query.on('row', function(row) {
@@ -244,7 +244,7 @@ exports.fetchAll = function(req, res){
         query.on('end', function() {
             //client.end();
             done();
-            logger.info({msg: 'Read rows', count: rows });
+            logger.info({message: 'Read rows', count: rows });
             logger.debug(results);
             getRows( ++propIDIndex );   // process next site returned
         });

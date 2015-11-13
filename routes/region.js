@@ -14,8 +14,8 @@ var logger = config.logger;
 exports.fetch = function(req, res){
   var regionID = req.query.regionID;
   var datetime = new Date();
-  logger.debug({
-      msg: 'Running regiondata fetch for specified region ID', 
+  logger.info({
+      message: 'Running regiondata fetch for specified region ID',
       regionId: regionID, 
       query: req.query
   });
@@ -27,10 +27,9 @@ exports.fetch = function(req, res){
     return res.status(500).send(msg);
   }
 
-//  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
   var selectString = "SELECT region_level, region_typename, region_child_typename, region_full_name, region_name, " +
     "region_abbrev, intpt_lat , intpt_lon, num_children, tag_country, tag_level1, tag_level2, tag_level3, " +
-    "region_id, area_land, area_water FROM region_tags WHERE region_id = '" + regionID + "';";
+    "region_id, area_land, area_water FROM region_tags WHERE region_id = $1;";
   var results = [];
   var rows = 0;
 
@@ -38,12 +37,12 @@ exports.fetch = function(req, res){
       if(err) {
         done();
         var msg='Unable to read from DQ database';
-        logger.error({msg: msg, error: err});
+        logger.error({message: msg, error: err});
         return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
-        var query = client.query(selectString);
+        var query = client.query(selectString, [regionID]);
 
         // Stream results back one row at a time
         query.on('row', function(row) {
@@ -54,7 +53,7 @@ exports.fetch = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
             done();
-            logger.info({msg: 'Read rows', count: rows});
+            logger.info({message: 'Read rows', count: rows});
             logger.debug(results);
            return res.json(results);
         });
@@ -63,7 +62,7 @@ exports.fetch = function(req, res){
           //handle the error
             done();
             var msg='Unable to read from DQ database';
-            logger.error({msg: msg, error: error});
+            logger.error({message: msg, error: error});
             return res.status(500).send(msg);
         });
 
@@ -84,7 +83,7 @@ exports.locate = function(req, res){
   var datetime = new Date();
   var msg;
   logger.info({
-      msg:'Running query to find region that includes coordinates', 
+      message:'Running query to find region that includes coordinates',
       longitude: longitude, latitude: latitude, query: req.query});
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -102,7 +101,7 @@ exports.locate = function(req, res){
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
   var selectString = "Select region_id,region_full_name,region_level from region_tags where " +
-    "ST_Contains(wkb_geometry, ST_SetSRID(ST_MakePoint(" + longitude + "," + latitude + "),'4326'));";
+    "ST_Contains(wkb_geometry, ST_SetSRID(ST_MakePoint($1,$2),'4326'));";
   var results = [];
   var rows = 0;
 
@@ -110,12 +109,12 @@ exports.locate = function(req, res){
       if(err) {
         done();
         var msg='Unable to connect to DQ database';
-        logger.error({msg: msg, err: err});
+        logger.error({message: msg, err: err});
         return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
-        var query = client.query(selectString);
+        var query = client.query(selectString, [longitude, latitude]);
 
         // Stream results back one row at a time
         query.on('row', function(row) {
@@ -126,8 +125,8 @@ exports.locate = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
             done();
-            logger.info({msg: 'Read rows', count: rows});
-            logger.debug(results);
+//            logger.info({message: 'Read rows', count: rows});
+//            logger.debug(results);
            return res.json(results);
         });
 
@@ -135,7 +134,7 @@ exports.locate = function(req, res){
           //handle the error
             done();
             var msg='Unable to read from DQ database';
-            logger.info({msg: msg, error: error});
+            logger.info({message: msg, error: error});
             return res.status(500).send(msg);
         });
 
@@ -164,8 +163,8 @@ exports.find = function(req, res){
   var countyName = req.query.nameCounty || '';
   var cityName = req.query.nameCity || '';
   var level = req.query.level || -1;
-  logger.debug({
-      msg:'Running region name search for specified name strings...',
+  logger.info({
+      message:'Running region name search for specified name strings...',
       generalName: generalName,
       countryName: countryName,
       stateName: stateName,
@@ -191,20 +190,29 @@ exports.find = function(req, res){
   var countySelect = '';
   var citySelect = '';
   var generalSelect = '';
-  var selectString = "SELECT region_id,region_full_name,region_level from region_tags WHERE ";
+  var params = [];
+  var selectString = 'SELECT region_id,region_full_name,region_level from region_tags WHERE ';
   if (level >= 0)
   {
-    selectString += "region_level = '" + level + "' AND ";
+    params.push(level);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    selectString += 'region_level = ' + pTag + ' AND ';
+    params.push(level);
   }
 
   if (countryName.length > 0){
-    countrySelect = "tag_country IN (SELECT tag_country from region_tags WHERE region_level = 0 AND (region_name = '" +
-        countryName + "' OR region_abbrev = '" + countryName + "')) ";
+    params.push(countryName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    countrySelect = "tag_country IN (SELECT tag_country from region_tags WHERE region_level = 0 AND (region_name = " +
+        pTag + " OR region_abbrev = " + pTag + ")) ";
+
     selectString += countrySelect;
   }
   if (stateName.length > 0){
-    stateSelect = "tag_level1 IN (SELECT tag_level1 from region_tags WHERE region_level = 1 AND (region_name = '" +
-        stateName + "' OR region_abbrev = '" + stateName + "') ";
+    params.push(stateName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    stateSelect = "tag_level1 IN (SELECT tag_level1 from region_tags WHERE region_level = 1 AND (region_name = " +
+        pTag + " OR region_abbrev = " + pTag + ") ";
     if (countrySelect.length > 0) {
         stateSelect += " AND " + countrySelect;
         selectString += " AND ";
@@ -213,8 +221,10 @@ exports.find = function(req, res){
     selectString += stateSelect;
   }
   if (countyName.length > 0){
-    countySelect = "tag_level2 IN (SELECT tag_level2 from region_tags WHERE region_level = 2 AND (region_name = '" +
-        countyName + "' OR region_abbrev = '" + countyName + "') ";
+    params.push(countyName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    countySelect = "tag_level2 IN (SELECT tag_level2 from region_tags WHERE region_level = 2 AND (region_name = " +
+        pTag + " OR region_abbrev = " + pTag + ") ";
     if (stateSelect.length > 0) {
         countySelect += "AND " + stateSelect;
         selectString += " AND ";
@@ -227,8 +237,10 @@ exports.find = function(req, res){
     selectString += countySelect;
   }
   if (cityName.length > 0){
-    citySelect = "tag_level3 IN (SELECT tag_level3 from region_tags WHERE region_level = 3 AND (region_name = '" +
-        cityName + "' OR region_abbrev = '" + cityName + "') ";
+    params.push(cityName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    citySelect = "tag_level3 IN (SELECT tag_level3 from region_tags WHERE region_level = 3 AND (region_name = " +
+        pTag + " OR region_abbrev = " + pTag + ") ";
     if (countySelect.length > 0) {
         citySelect += "AND " + countySelect;
         selectString += " AND ";
@@ -245,12 +257,17 @@ exports.find = function(req, res){
     selectString += citySelect;
   }
   if (generalName.length > 0){
-    generalSelect = "(region_full_name LIKE '%" + generalName + "%' OR region_name LIKE '%" + generalName + "%' OR region_abbrev = '" + generalName + "')";
+    var searchName = '%'+generalName+'%';
+    params.push(searchName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    params.push(generalName);
+    var pTag2 = '$'+params.length;
+    generalSelect = "(region_full_name LIKE " + pTag + " OR region_name LIKE " + pTag + " OR region_abbrev = " + pTag2 + ")";
     if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0 || citySelect.length) selectString += " AND ";
     selectString += generalSelect;
   }
   selectString += ";";
-  logger.debug({query:  selectString});
+//  logger.info({query:  selectString, params: params});
 
   var results = [];
   var rows = 0;
@@ -259,12 +276,13 @@ exports.find = function(req, res){
       if(err) {
         done();
         var msg='Unable to connect to DQ database';
-        logger.error({msg: msg, error: err});
+        logger.error({message: msg, error: err});
         return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
-        var query = client.query(selectString);
+        logger
+        var query = client.query(selectString, params);
 
         // Stream results back one row at a time
         query.on('row', function(row) {
@@ -275,8 +293,8 @@ exports.find = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
             done();
-            logger.info({msg: 'Read rows', count: rows});
-            logger.debug(results);
+//            logger.info({message: 'Read rows', count: rows});
+//            logger.debug(results);
             return res.json(results);
         });
 
@@ -284,7 +302,7 @@ exports.find = function(req, res){
           //handle the error
             done();
             msg = 'Unable to read from DQ database';
-            logger.error({msg: msg, error: error});
+            logger.error({message: msg, error: error});
             return res.status(500).send(msg);
         });
 
@@ -305,7 +323,7 @@ exports.adjacent = function(req, res){
   var regionLevel = req.query.level || 2;
   var datetime = new Date();
   var msg;
-  logger.info({msg: 'Running nearby region locate', regionID: regionID, regionLevel: regionLevel});
+  logger.info({message: 'Running nearby region locate', regionID: regionID, regionLevel: regionLevel});
   logger.debug(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
@@ -316,7 +334,7 @@ exports.adjacent = function(req, res){
   }
 
   var selectString = "select fgb.region_id,fgb.region_full_name from region_tags as fga, region_tags as fgb " +
-    	"WHERE fga.region_id = '" + regionID + "' AND fgb.region_level = '" + regionLevel + "' AND fgb.region_id != '" + regionID + "'" +
+    	"WHERE fga.region_id = $1 AND fgb.region_level = $2 AND fgb.region_id != $1" +
 		    "AND ST_Intersects(fga.wkb_geometry, fgb.wkb_geometry);";
   var results = [];
   var rows = 0;
@@ -325,12 +343,12 @@ exports.adjacent = function(req, res){
       if(err) {
         done();
         msg = 'Unable to connect to DQ database';
-        logger.error({msg: msg, err: err});
+        logger.error({message: msg, err: err});
         return res.status(500).send(msg);
       }
       else {
         // SQL Query > Select Data
-        var query = client.query(selectString);
+        var query = client.query(selectString, [regionID,regionLevel]);
 
         // Stream results back one row at a time
         query.on('row', function(row) {
@@ -341,8 +359,8 @@ exports.adjacent = function(req, res){
         // After all data is returned, close connection and return results
         query.on('end', function() {
            done();
-           logger.info({msg: 'Read rows', count: rows});
-           logger.debug(results);
+//           logger.info({message: 'Read rows', count: rows});
+//           logger.debug(results);
            return res.json(results);
         });
 
@@ -350,7 +368,7 @@ exports.adjacent = function(req, res){
           //handle the error
             done();
             var msg = 'Unable to read from DQ database';
-            logger.error({msg: msg, error: err});
+            logger.error({message: msg, error: err});
             return res.status(500).send(msg);
         });
 
@@ -397,7 +415,7 @@ getAsset = function(res, s3, regionID, regionLevel, resource ) {
           // if here, we have exhausted all of our levels (resource not at any level)
           // report error since could not find resource file
           logger.error({
-              msg: 'Unable to locate DQ regional asset', 
+              message: 'Unable to locate DQ regional asset',
               resource: resource, error: err});
           res.status(500).send('Resource not found: ' + resourceFile);
         }
@@ -439,7 +457,7 @@ exports.fetchAsset = function(req, res){
   if (regionID.length > 4) regionLevel++;
   if (regionID.length > 7) regionLevel++;
   var resource = req.query.resource;
-  logger.debug({msg: 'Running region asset fetch', 
+  logger.info({message: 'Running region asset fetch',
           region: regionID, regionLevel: regionLevel, query: req.query});
   res.setHeader("Access-Control-Allow-Origin", "*");
 

@@ -37,9 +37,9 @@ exports.dataSource = function(req, res){
   var fieldName = req.query.source_name;
   var datetime = new Date();
   
-  logger.info({msg:'Running data source query', fieldName: fieldName, region: regionID, query: req.query});
+  logger.info({message:'Running data source query', fieldName: fieldName, region: regionID, query: req.query});
 
-  var selectString = "select * from field_source INNER JOIN data_source USING (source) WHERE '" + fieldName + "' = ANY(field_source.field_name) AND field_source.regionid = '" + regionID + "';";
+  var selectString = "select * from field_source INNER JOIN data_source USING (source) WHERE $1 = ANY(field_source.field_name) AND field_source.regionid = $2;";
   var results = [];
   var rows = 0;
     pg.connect(config.pg.connectionDef, function(err, client, done) {
@@ -50,7 +50,7 @@ exports.dataSource = function(req, res){
       }
       else {
         // SQL Query > Select Data
-        var query = client.query(selectString);
+        var query = client.query(selectString, [fieldName,regionID]);
 
         // Stream results back one row at a time
         query.on('row', function(row) {
@@ -66,9 +66,9 @@ exports.dataSource = function(req, res){
             fault_inject_client_end(client);
             done();
             if (rows === 0){
-                logger.info({msg: "requested source_name not found in field_sources DB", fieldName: fieldName});
+                logger.info({message: "requested source_name not found in field_sources DB", fieldName: fieldName});
             } else {
-                logger.info({msg: 'Read rows', count: rows});
+                logger.info({message: 'Read rows', count: rows});
             }
            logger.debug(results);
            return res.json(results);
