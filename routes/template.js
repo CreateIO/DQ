@@ -21,14 +21,14 @@ var logger = config.logger;
 function findVersion (currentVersion, templateJSON ) {
     var objectVersion = "0.0.0";
     var objectResult = templateJSON[0].template;    // grab first (oldest) version in template
-    logger.info({msg: 'Check Versions init', objectVersion: objectVersion, currentVersion: currentVersion});
+//    logger.info({message: 'Check Versions init', objectVersion: objectVersion, currentVersion: currentVersion});
     for (var ii in templateJSON) {
         var version = templateJSON[ii].version;
-        logger.info('  Located Version: ' + version );
+//        logger.info('  Located Version: ' + version );
         // get latest version that is less than or equal to current requested version\
         // NOTE: currently only handles single digit release numbers since doing alphanumeric comparison!
         if (version <= currentVersion && version > objectVersion) {
-            logger.info('  Found better Version: ' + version );
+//            logger.info('  Found better Version: ' + version );
             objectVersion = version;
             objectResult = templateJSON[ii].template;
         }
@@ -41,15 +41,15 @@ function findVersion (currentVersion, templateJSON ) {
  */
 function writeToCache( fs, fd, resourceFile, contents )
 {
-   logger.info('   writing file to local cache: ' + resourceFile );
+//   logger.info('   writing file to local cache: ' + resourceFile );
    fs.write(fd, contents, 0, 'utf8', function(err, length, result) {
      if (err) {
          // report error since could not find resource file
-         logger.info('An error occurred while writing file to local cache with status: ' + err);
+         logger.error({message: 'An error occurred while writing file to local cache with status: ', error: err});
      }
      else {
          // return json object that corresponds to best version available within resource file
-         logger.info("Wrote " + length + ' bytes to local cache file ' + resourceFile);
+//         logger.info("Wrote " + length + ' bytes to local cache file ' + resourceFile);
      }
      fs.closeSync(fd);
    });
@@ -138,15 +138,15 @@ function readFromGitHub( res, resource, branch, region_id, version )
  */
 exports.fetch = function(req, res){
   var datetime = new Date();
-  logger.info(datetime + ': Running fetch for specified template:');
+  logger.info({message: 'Running fetch for specified template'});
 
   // first make sure have required values...
   if (typeof req.query.resource === 'undefined' || req.query.resource === null) {
-    logger.info('  Input error: no template specified' );
+    logger.error('  Input error: no template specified' );
     return res.status(500).send('Missing resource');
   }
   if (typeof req.query.resource === 'undefined' || req.query.resource === null) {
-    logger.info('  Input error: no version specified' );
+    logger.error('  Input error: no version specified' );
     return res.status(500).send('Missing version');
   }
   var resource = req.query.resource;
@@ -157,15 +157,11 @@ exports.fetch = function(req, res){
 
   res.setHeader('Access-Control-Allow-Origin', '*');
 
-//  logger.info(req.query);
-  logger.info('   requested resource: ' + resource + ' on branch: ' + branch);
-//  logger.info("   cache flag: " + cacheFlag);
-
 /*
  * Read file from local cache if using cache
  */
   var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + region_id + '/template/' + resource + '.json';
-  logger.info("   file URL: " + resourceFile );
+  logger.info({resource: resource, branch: branch, url: resourceFile});
   fs.readFile(resourceFile, 'utf8', function(err,data) {
     if (err || data.length < 1) {
         // try github since file not available in local cache
