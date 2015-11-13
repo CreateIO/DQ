@@ -163,7 +163,7 @@ exports.find = function(req, res){
   var countyName = req.query.nameCounty || '';
   var cityName = req.query.nameCity || '';
   var level = req.query.level || -1;
-  logger.debug({
+  logger.info({
       message:'Running region name search for specified name strings...',
       generalName: generalName,
       countryName: countryName,
@@ -190,20 +190,29 @@ exports.find = function(req, res){
   var countySelect = '';
   var citySelect = '';
   var generalSelect = '';
-  var selectString = "SELECT region_id,region_full_name,region_level from region_tags WHERE ";
+  var params = [];
+  var selectString = 'SELECT region_id,region_full_name,region_level from region_tags WHERE ';
   if (level >= 0)
   {
-    selectString += "region_level = '" + level + "' AND ";
+    params.push(level);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    selectString += 'region_level = ' + pTag + ' AND ';
+    params.push(level);
   }
 
   if (countryName.length > 0){
-    countrySelect = "tag_country IN (SELECT tag_country from region_tags WHERE region_level = 0 AND (region_name = '" +
-        countryName + "' OR region_abbrev = '" + countryName + "')) ";
+    params.push(countryName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    countrySelect = "tag_country IN (SELECT tag_country from region_tags WHERE region_level = 0 AND (region_name = " +
+        pTag + " OR region_abbrev = " + pTag + ")) ";
+
     selectString += countrySelect;
   }
   if (stateName.length > 0){
-    stateSelect = "tag_level1 IN (SELECT tag_level1 from region_tags WHERE region_level = 1 AND (region_name = '" +
-        stateName + "' OR region_abbrev = '" + stateName + "') ";
+    params.push(stateName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    stateSelect = "tag_level1 IN (SELECT tag_level1 from region_tags WHERE region_level = 1 AND (region_name = " +
+        pTag + " OR region_abbrev = " + pTag + ") ";
     if (countrySelect.length > 0) {
         stateSelect += " AND " + countrySelect;
         selectString += " AND ";
@@ -212,8 +221,10 @@ exports.find = function(req, res){
     selectString += stateSelect;
   }
   if (countyName.length > 0){
-    countySelect = "tag_level2 IN (SELECT tag_level2 from region_tags WHERE region_level = 2 AND (region_name = '" +
-        countyName + "' OR region_abbrev = '" + countyName + "') ";
+    params.push(countyName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    countySelect = "tag_level2 IN (SELECT tag_level2 from region_tags WHERE region_level = 2 AND (region_name = " +
+        pTag + " OR region_abbrev = " + pTag + ") ";
     if (stateSelect.length > 0) {
         countySelect += "AND " + stateSelect;
         selectString += " AND ";
@@ -226,8 +237,10 @@ exports.find = function(req, res){
     selectString += countySelect;
   }
   if (cityName.length > 0){
-    citySelect = "tag_level3 IN (SELECT tag_level3 from region_tags WHERE region_level = 3 AND (region_name = '" +
-        cityName + "' OR region_abbrev = '" + cityName + "') ";
+    params.push(cityName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    citySelect = "tag_level3 IN (SELECT tag_level3 from region_tags WHERE region_level = 3 AND (region_name = " +
+        pTag + " OR region_abbrev = " + pTag + ") ";
     if (countySelect.length > 0) {
         citySelect += "AND " + countySelect;
         selectString += " AND ";
@@ -244,12 +257,17 @@ exports.find = function(req, res){
     selectString += citySelect;
   }
   if (generalName.length > 0){
-    generalSelect = "(region_full_name LIKE '%" + generalName + "%' OR region_name LIKE '%" + generalName + "%' OR region_abbrev = '" + generalName + "')";
+    var searchName = '%'+generalName+'%';
+    params.push(searchName);
+    var pTag = '$'+params.length;     // create $1, $2, etc. based on how many params we have
+    params.push(generalName);
+    var pTag2 = '$'+params.length;
+    generalSelect = "(region_full_name LIKE " + pTag + " OR region_name LIKE " + pTag + " OR region_abbrev = " + pTag2 + ")";
     if (countrySelect.length > 0 || stateSelect.length > 0 || countySelect.length > 0 || citySelect.length) selectString += " AND ";
     selectString += generalSelect;
   }
   selectString += ";";
-  logger.debug({query:  selectString});
+//  logger.info({query:  selectString, params: params});
 
   var results = [];
   var rows = 0;
@@ -263,7 +281,8 @@ exports.find = function(req, res){
       }
       else {
         // SQL Query > Select Data
-        var query = client.query(selectString);
+        logger
+        var query = client.query(selectString, params);
 
         // Stream results back one row at a time
         query.on('row', function(row) {
