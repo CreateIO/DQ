@@ -46,7 +46,7 @@ cat /dev/null > "$errorlog"
 
     do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=master" \
         tabs_generic \
-    '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
+        '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
 
     do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=test" \
         tabs_branch \
@@ -102,7 +102,7 @@ cat /dev/null > "$errorlog"
 
     do_curl "${dq_host}/DQ/analysisData?regionID=US11001&neighborhood=Adams%20Morgan" \
         fetchAnalysis \
-        '[{"bkt_sale":"0-250K","fin_land_old_land_value":'exi
+        '[{"bkt_sale":"0-250K","fin_land_old_land_value":'
 
     do_curl "${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001" \
         datasource \

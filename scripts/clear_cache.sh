@@ -11,6 +11,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 cache_dir="$DIR/../../DQMatchSetsLocal"
 # Just in case the cache dir hasn't been created yet, create it (harmless if there)
-mkdir -p "$cache_dir"
-rm -rf "$cache_dir/*"
+echo 'clearing '$cache_dir
+mkdir -p $cache_dir
+rm -rf $cache_dir/*
 
