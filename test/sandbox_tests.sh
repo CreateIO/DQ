@@ -98,11 +98,11 @@ cat /dev/null > "$errorlog"
 
     do_curl "${dq_host}/DQ/version" \
         fetchversion \
-        'DB_HOST":"dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com","S3_ASSET_BUCKET":"create.assets","S3_ASSET'
+        '.cvwdsktow3o7.us-east-1.rds.amazonaws.com","S3_ASSET_BUCKET":"create.assets","S3_ASSET'
 
     do_curl "${dq_host}/DQ/analysisData?regionID=US11001&neighborhood=Adams%20Morgan" \
         fetchAnalysis \
-        '[{"bkt_sale":"0-250K","fin_land_old_land_value":'
+        '[{"bkt_sale":"0-250K","fin_land_old_land_value":'exi
 
     do_curl "${dq_host}/DQ/datasource?source_name=airRights&regionID=US11001" \
         datasource \
