@@ -17,6 +17,37 @@ var logger = config.logger;
 */
 
 /*
+ *  This function finds the version in the template that is less than or equal to the requested version
+ *  NOTE: this is only here for backward compatibility and should go away once we no longer are using the old format...
+*/
+function findVersion (currentVersion, inputJSON ) {
+    if (!inputJSON.versions  )
+    {
+        // new format, no version metadata required...
+        //logger.info('New refactored template format');
+        return inputJSON;
+    }
+    // if here, we must extranct version data...
+    //logger.info('Old template format');
+    var templateJSON = inputJSON.versions;
+    var objectVersion = "0.0.0";
+    var objectResult = templateJSON[0].template;    // grab first (oldest) version in template
+//    logger.info({message: 'Check Versions init', objectVersion: objectVersion, currentVersion: currentVersion});
+    for (var ii in templateJSON) {
+        var version = templateJSON[ii].version;
+//        logger.info('  Located Version: ' + version );
+        // get latest version that is less than or equal to current requested version\
+        // NOTE: currently only handles single digit release numbers since doing alphanumeric comparison!
+        if (version <= currentVersion && version > objectVersion) {
+//            logger.info('  Found better Version: ' + version );
+            objectVersion = version;
+            objectResult = templateJSON[ii].template;
+        }
+    }
+    return (objectResult);
+}
+
+/*
  * This code writes a file to local FS
  */
 function writeToCache( fs, fd, resourceFile, contents )
@@ -37,12 +68,12 @@ function writeToCache( fs, fd, resourceFile, contents )
 
 function writeToLocalCache( resource, branch, region_id, contents )
 {
-  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + region_id + '/' + resource + '.json';
+  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + region_id + '/template/' + resource + '.json';
   var fd = fs.open(resourceFile, 'w', function( err, fd ) {
       if (err){
         var regionFolder = '../' + process.env.LOCAL_CACHE  + '/' + branch + '/' + region_id;
         var moreFolders = resource.split("/");  // any more folders?
-        var templateFolder = regionFolder;
+        var templateFolder = regionFolder + '/template';
         //logger.info(moreFolders);
         for(var ii=0; ii<moreFolders.length-1; ii++) {
             // iterate through any additional folders that are passed in as part of the resource spec
@@ -76,7 +107,7 @@ function writeToLocalCache( resource, branch, region_id, contents )
 /*
  * This code reads template file from a github repository for a specific branch or tag
  */
-function readFromGitHub( res, resource, branch, regionCountry, regionTag, callback )
+function readFromGitHub( res, version, resource, branch, regionCountry, regionTag, callback )
 {
   // Note: we get github values (user, token, repo, branch) from global environment specified in dq_env.sh
   var github = new Github({
@@ -86,9 +117,8 @@ function readFromGitHub( res, resource, branch, regionCountry, regionTag, callba
   var repo = github.getRepo(process.env.GITHUB_OWNER, process.env.GITHUB_TEMPLATE_REPO);
 
   // we read first from national/global resource...
-  var resourceFile = process.env.GITHUB_FOLDER + regionCountry + '/' + resource + '.json';
+  var resourceFile = process.env.GITHUB_FOLDER + regionCountry + '/template/' + resource + '.json';
   var resultObject = {};    // assume did not find file in github
-  resultObject = JSON.stringify(resultObject);
 
   logger.info('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + branch);
   repo.read(branch, resourceFile, function(err, data) {
@@ -99,7 +129,8 @@ function readFromGitHub( res, resource, branch, regionCountry, regionTag, callba
     }
     else {
         try {
-            resultObject = JSON.parse(data);
+            var JSONdata =  JSON.parse(data);
+            resultObject = findVersion(version, JSONdata);
 
             // now that have data, cache it locally!
             writeToLocalCache( resource, branch, regionCountry, data );
@@ -111,9 +142,8 @@ function readFromGitHub( res, resource, branch, regionCountry, regionTag, callba
     }
 
     // now read again from local region
-    resourceFile = process.env.GITHUB_FOLDER + regionTag + '/' + resource + '.json';
+    resourceFile = process.env.GITHUB_FOLDER + regionTag + '/template/' + resource + '.json';
     var regionalResultObject = {};    // assume did not find file in github
-    regionalResultObject = JSON.stringify(regionalResultObject);
 
     logger.info('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + branch);
     repo.read(branch, resourceFile, function(err, data) {
@@ -124,7 +154,8 @@ function readFromGitHub( res, resource, branch, regionCountry, regionTag, callba
         }
         else {
             try {
-                regionalResultObject = JSON.parse(data);
+                var JSONdata =  JSON.parse(data);
+                regionalResultObject = findVersion(version, JSONdata);
                  // now that have data, cache it locally!
                 writeToLocalCache( resource, branch, regionTag, data );
             }
@@ -136,7 +167,7 @@ function readFromGitHub( res, resource, branch, regionCountry, regionTag, callba
         // now "absorb" regional into national...
         //logger.info(resultObject);
         //logger.info(regionalResultObject);
-        deepExtend(resultObject, regionalResultObject, true);
+        deepExtend(resultObject, regionalResultObject);
         //logger.info(resultObject);
         // return the JSON result (or null object if not present in github)
         res.send(resultObject);
@@ -149,6 +180,8 @@ function readFromGitHub( res, resource, branch, regionCountry, regionTag, callba
  */
 exports.fetch = function(req, res){
   var datetime = new Date();
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
   logger.info({message: 'Running fetch for specified template'});
 
   // first make sure have required values...
@@ -157,11 +190,16 @@ exports.fetch = function(req, res){
     return res.status(500).send('Missing resource');
   }
   var resource = req.query.resource;
+  var version = req.query.version || '1.0.0';
   var regionTag = req.query.region || 'US11001';                        // use region not specified in request, default to DC
-  var cacheFlag = req.query.cache || 'true';                            // use cache if not specified in request
   var branch = req.query.branch || process.env.GITHUB_TEMPLATE_BRANCH;  // use env. branch if not specified in request
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
+/*
+ * Backward compatiblity check (are we using old template schem or new?)
+ *  If "US" folder is not present, then us
+ */
+
+
 
 /*
  * Fetch national/global template first
@@ -170,16 +208,17 @@ exports.fetch = function(req, res){
  *  Local cache is cleared when receive notice from github that branch has been merged or pushed...
  */
   var regionCountry = regionTag.substring(0,2);
-  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + regionCountry + '/' + resource + '.json';
+  var resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + regionCountry + '/template/' + resource + '.json';
   logger.info({resource: resource, branch: branch, url: resourceFile});
   fs.readFile(resourceFile, 'utf8', function(err,data) {
     if (err || data.length < 1) {
         // try github since file not available in local cache
-        readFromGitHub( res, resource, branch, regionCountry, regionTag );
+        readFromGitHub( res, version, resource, branch, regionCountry, regionTag );
     }
     else {
         // NOTE: since this is cached, we know that the JSON.parse will never throw an error here
-        var resultObject = JSON.parse(data);
+        var JSONdata =  JSON.parse(data);
+        var resultObject = findVersion(version, JSONdata);
         //    logger.info(resultObject);
         /*
          * Now read file from regional template location and "absorb" into national template...
@@ -187,18 +226,18 @@ exports.fetch = function(req, res){
          *  Note that when a template is NOT found in github, an empty JSON object is stored to local cache so that we
          *      don't keep trying to get it from github on each resource request (and so we know it should be here now).
          */
-        resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + regionTag + '/' + resource + '.json';
+        resourceFile = '../' + process.env.LOCAL_CACHE + '/' + branch + '/' + regionTag + '/template/'+ resource + '.json';
         logger.info({resource: resource, branch: branch, url: resourceFile});
         fs.readFile(resourceFile, 'utf8', function(err,data) {
             var regionalResultObject = {};
-            regionalResultObject = JSON.stringify(regionalResultObject);
             if (err || data.length < 1) {
                 // should not have this error, but we already have a national object... just log it...
                 logger.error({message: 'Error reading local region file', file: resourceFile, error: err});
             }
             else {
                 // NOTE: since this is cached, we know that the JSON.parse will never throw an error here
-                regionalResultObject = JSON.parse(data);
+                var JSONdata = JSON.parse(data);
+                regionalResultObject = findVersion(version, JSONdata);
             }
 
             // now absorb local into national
