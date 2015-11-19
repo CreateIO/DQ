@@ -46,7 +46,7 @@ cat /dev/null > "$errorlog"
 
     do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=master" \
         tabs_generic \
-    '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
+        '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
 
     do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=test" \
         tabs_branch \
@@ -98,7 +98,7 @@ cat /dev/null > "$errorlog"
 
     do_curl "${dq_host}/DQ/version" \
         fetchversion \
-        'DB_HOST":"dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com","S3_ASSET_BUCKET":"create.assets","S3_ASSET'
+        '.cvwdsktow3o7.us-east-1.rds.amazonaws.com","S3_ASSET_BUCKET":"create.assets","S3_ASSET'
 
     do_curl "${dq_host}/DQ/analysisData?regionID=US11001&neighborhood=Adams%20Morgan" \
         fetchAnalysis \
