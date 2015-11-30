@@ -20,7 +20,7 @@ formRegionFolderName = function(region_id) {
   var region_state = region_id.substring(0,4);
   var region_county = region_id.substring(0,7);
   var fullName = process.env.S3_ASSET_FOLDER + '/country/' + region_country + '/state/' + region_state + '/county/' + region_county;
-  if (fullName.length > 7){
+  if (region_id.length > 7){
     // may be a city spec name, if so, add city to path
     fullName += '/city/' + region_id;
   }
@@ -76,9 +76,9 @@ exports.fetch = function(req, res){
             // omit the prefix to list the whole bucket
             prefix: fullName
           }).on('data', function(key) {
+            //logger.info({message: "Data from knoxCopy request", key: key});
             if (key.slice(-3) == type)
             {
-              logger.debug(key);
               files.push(key);
               fileCount++;
             }
@@ -127,7 +127,7 @@ exports.fetch = function(req, res){
     query.on('end', function() {
         //client.end();
         done();
-        logger.debug({message: "Read rows", count: rows, results: results});
+        //logger.info({message: "Read rows", count: rows, results: results});
         getFiles( 0 );                  // sequentially go get files for each row returned
     });
 
@@ -186,9 +186,9 @@ exports.fetchAll = function(req, res){
             // omit the prefix to list the whole bucket
             prefix: fullName
           }).on('data', function(key) {
+            //logger.info({message: "Data from knoxCopy request", key: key});
             if (key.slice(-3) == type)
             {
-              logger.debug(key);
               files.push(key);
               fileCount++;
             }

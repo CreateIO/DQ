@@ -60,17 +60,17 @@ cat /dev/null > "$errorlog"
         docurl_generic \
         '[{"fileNames":[],"status":"success","count":0}]'
 
-    do_curl "${dq_host}/DQ/docURL?propertyID=102613&version=1.0.0" \
+    do_curl "${dq_host}/DQ/docCollection?propertyIdBin=5511&propertyIdBin=2&version=1.0.0&type=pdf" \
         docurl_single \
-        '[{"id":1449,"assets":"Spring_Valley","fileNames":[],"status":"success","count":0}]'
+        '[{"id":620,"property_id":"5511","assets":"1001_Pennsylvania_Avenue","fileNames":["regional_assets/country/US/state/US11/county/US11001/imagesets-/1001_Pennsylvania_Avenue/1001PennsylvaniaAvenue_millerwlker_15.pdf",'
 
     do_curl "${dq_host}/DQ/docCollection?propertyIdBin=153058&propertyIdBin=5473&version=1.0.0&type=pdf" \
         doccollection \
-        '[{"id":346,"property_id":"5473","assets":"1010_Massachusetts_Avenue","fileNames":[],"status":"success","count":0}]'
+        '[{"id":346,"property_id":"5473","assets":"1010_Massachusetts_Avenue","fileNames":["regional_assets/country/US/state/US11/county/US11001/imagesets-/1010_Massachusetts_Avenue/1010_mass_ave_nw_millerwalker_04_13.pdf'
 
-    do_curl "${dq_host}/DQ/docURL?propertyID=131292&version=1.0.0" \
+    do_curl "${dq_host}/DQ/docURL?version=1.0.0&region=US11001&type=jpg&propertyID=5511" \
         docurl_double \
-        '[{"id":1482,"assets":"3365_14th_Street","fileNames":[],"status":"success","count":0},{"id":47,'
+        '[{"id":620,"assets":"1001_Pennsylvania_Avenue","fileNames":["regional_assets/country/US/state/US11/county/US11001/imagesets-/1001_Pennsylvania_Avenue/1001PennAveNW.jpg",'
 
     do_curl "${dq_host}/DQ/docURL?parcelID=3434&version=1.0.0" \
         docurl_single_parcelid \
