@@ -69,6 +69,7 @@ app.get('/DQ/datasource', metadata.dataSource);
 app.get('/DQ/docCollection', docURL.fetchAll );
 app.get('/DQ/docURL', docURL.fetch );
 app.get('/DQ/nearbyregions', region.adjacent);
+app.get('/DQ/propCount', analysis.fetchPropCount);
 app.get('/DQ/region', region.locate);
 app.get('/DQ/regionasset', region.fetchAsset);
 app.get('/DQ/regiondata', region.fetch);
