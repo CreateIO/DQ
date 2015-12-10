@@ -92,7 +92,7 @@ exports.fetchPropCount = function(req, res){
   var top = req.query.top;
   var datetime = new Date();
   var msg;
-  logger.info({message: 'Running property count fetch', regionID: regionID, range: range, top: top, envelope: envelope});
+  logger.info({message: 'Running property count fetch', regionID: regionID});
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (typeof req.query.regionID === "undefined" || req.query.regionID === null) {
