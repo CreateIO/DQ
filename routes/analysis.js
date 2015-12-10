@@ -92,8 +92,7 @@ exports.fetchPropCount = function(req, res){
   var top = req.query.top;
   var datetime = new Date();
   var msg;
-  logger.info({message: 'Running property count fetch', regionID: regionID, range: range});
-  logger.debug(req.query);
+  logger.info({message: 'Running property count fetch', regionID: regionID, range: range, top: top, envelope: envelope});
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (typeof req.query.regionID === "undefined" || req.query.regionID === null) {
@@ -139,7 +138,7 @@ exports.fetchPropCount = function(req, res){
     }
     else {
       // SQL Query > Select Data
-      logger.info({message: 'Query String', query: selectString, regionID: regionID, since: datetime.toISOString(), limit: top});
+      //logger.info({message: 'Query String', query: selectString, regionID: regionID, since: datetime.toISOString(), limit: top});
       var query = client.query(selectString, [regionID,datetime.toISOString(),top]);
 
       // Stream results back one row at a time
@@ -152,7 +151,6 @@ exports.fetchPropCount = function(req, res){
       query.on('end', function() {
           done();
           logger.info({message: 'Read rows', count: rows});
-          logger.debug(results);
           return res.json(results);
       });
 
