@@ -115,5 +115,18 @@ cat /dev/null > "$errorlog"
     do_curl "${dq_host}/DQ/regionFind?name=Washington" \
         regionname2 \
         '{"region_id":"US39167","region_full_name":"Washington County, OH, US","region_level":2}'
+
+    do_curl "${dq_host}/DQ/propCount?regionID=US11001&top=5" \
+        pcount1 \
+        '"address":"20005,WASHINGTON, 405 8TH ST NW","lat":-77.0227068504,"long":38.8953269845},{"select_count"'
+
+    do_curl "${dq_host}/DQ/propCount?regionID=US11001&range=3&top=5" \
+        pcount2 \
+       '"address":"20006,WASHINGTON, 801 17TH ST NW","lat":-77.0391170481,"long":38.9005373136},{"select_count":'
+
+    do_curl "${dq_host}/DQ/propCount?regionID=US11001&top=5&range=3&envelope=-77.0&envelope=38.899471994&envelope=-76.9873458022&envelope=38.95" \
+        pcount3 \
+        '"address":"20002,WASHINGTON, 1334 5TH ST NE","lat":-76.9976492863,"long":38.9096392123},{"select_count"'
+
 ) | tee sandbox_tests.txt
 exit "$(count_test_failures)"
