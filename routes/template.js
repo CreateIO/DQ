@@ -107,7 +107,7 @@ function writeToLocalCache( resource, branch, region_id, contents )
 /*
  * This code reads template file from a github repository for a specific branch or tag
  */
-function readFromGitHub( res, version, resource, branch, regionCountry, regionTag, callback )
+function readFromGitHub( res, version, resource, branch, regionCountry, regionTag, countryData )
 {
   // Note: we get github values (user, token, repo, branch) from global environment specified in dq_env.sh
   var github = new Github({
@@ -116,62 +116,74 @@ function readFromGitHub( res, version, resource, branch, regionCountry, regionTa
   });
   var repo = github.getRepo(process.env.GITHUB_OWNER, process.env.GITHUB_TEMPLATE_REPO);
 
-  // we read first from national/global resource...
-  var resourceFile = process.env.GITHUB_FOLDER + regionCountry + '/template/' + resource + '.json';
-  var resultObject = {};    // assume did not find file in github
+  // we read first from local file...
+  var regionResourceFile = process.env.GITHUB_FOLDER + regionTag + '/template/' + resource + '.json';
+  var regionResultObject = {};    // assume did not find file in github
 
-  logger.info('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + branch);
-  repo.read(branch, resourceFile, function(err, data) {
+  logger.info('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + regionResourceFile + ' on branch: ' + branch);
+  repo.read(branch, regionResourceFile, function(err, data) {
     if (err) {
         // file does not exist on github -- write empty JSON object to local cache for next call to this resource
-        //logger.error({message: "Unable to read national file from github", error: err})
-        writeToLocalCache( resource, branch, regionCountry, '{}' );
+        logger.error({message: "Unable to read regional file from github, writing empty file to cache", error: err})
+        writeToLocalCache( resource, branch, regionTag, '{}' );
     }
     else {
         try {
             var JSONdata =  JSON.parse(data);
-            resultObject = findVersion(version, JSONdata);
+            regionResultObject = findVersion(version, JSONdata);
 
             // now that have data, cache it locally!
-            writeToLocalCache( resource, branch, regionCountry, data );
+            writeToLocalCache( resource, branch, regionTag, data );
         }
         catch(e) {
             logger.info({message: 'Error parsing JSON for resource', error: e});
-            writeToLocalCache( resource, branch, regionCountry, '{}' ); // write empty object to local cache until user pushes branch again
+            writeToLocalCache( resource, branch, regionTag, '{}' ); // write empty object to local cache until user pushes branch again
        }
     }
 
-    // now read again from local region
-    resourceFile = process.env.GITHUB_FOLDER + regionTag + '/template/' + resource + '.json';
-    var regionalResultObject = {};    // assume did not find file in github
+    // now see if need national and read again from national region if so (otherwise, already have data present)
+    var nationalResultObject = {};    // assume did not find file in github
+    if (regionCountry){
+      // if here, we need to check github for national data
+      nationalResourceFile = process.env.GITHUB_FOLDER + regionCountry + '/template/' + resource + '.json';
 
-    logger.info('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + resourceFile + ' on branch: ' + branch);
-    repo.read(branch, resourceFile, function(err, data) {
+      logger.info('Reading file from github: ' + process.env.GITHUB_TEMPLATE_REPO + '/' + nationalResourceFile + ' on branch: ' + branch);
+      repo.read(branch, nationalResourceFile, function(err, data) {
         if (err) {
             // file does not exist on github -- write empty JSON object to local cache for next call to this resource
-            //logger.error({message: "Unable to read regional file from github", error: err})
-            writeToLocalCache( resource, branch, regionTag, '{}' );
+            logger.error({message: "Unable to read national file from github, writing empty file to cache", error: err})
+            writeToLocalCache( resource, branch, regionCountry, '{}' );
         }
         else {
-            try {
-                var JSONdata =  JSON.parse(data);
-                regionalResultObject = findVersion(version, JSONdata);
-                 // now that have data, cache it locally!
-                writeToLocalCache( resource, branch, regionTag, data );
-            }
-            catch(e) {
-                logger.info({message: 'Error parsing JSON for resource', error: e});
-                writeToLocalCache( resource, branch, regionTag, '{}' ); // write empty object to local cache until user pushes branch again
-           }
+          try {
+            var JSONdata =  JSON.parse(data);
+            nationalResultObject = findVersion(version, JSONdata);
+             // now that have data, cache it locally!
+            writeToLocalCache( resource, branch, regionCountry, data );
+          }
+          catch(e) {
+              logger.info({message: 'Error parsing JSON for resource', error: e});
+              writeToLocalCache( resource, branch, regionCountry, '{}' ); // write empty object to local cache until user pushes branch again
+          }
         }
         // now "absorb" regional into national...
-        //logger.info(resultObject);
-        //logger.info(regionalResultObject);
-        deepExtend(resultObject, regionalResultObject);
+        //logger.info(nationalResultObject);
+        //logger.info(regionResultObject);
+        deepExtend(nationalResultObject, regionResultObject);
         //logger.info(resultObject);
         // return the JSON result (or null object if not present in github)
-        res.send(resultObject);
-    });
+        res.send(nationalResultObject);
+      });
+    }
+    else{
+      // if here, we have already read national data, use what we found
+      nationalResourceObject = countryData; // grab what we passed us that have already read from cache
+      // now "absorb" regional into national...
+      deepExtend(nationalResultObject, regionResultObject);
+      //logger.info(resultObject);
+      // return the JSON result (or null object if not present in github)
+      res.send(nationalResultObject);
+    }
   });
 };
 
@@ -213,7 +225,7 @@ exports.fetch = function(req, res){
   fs.readFile(resourceFile, 'utf8', function(err,data) {
     if (err || data.length < 1) {
         // try github since file not available in local cache
-        readFromGitHub( res, version, resource, branch, regionCountry, regionTag );
+        readFromGitHub( res, version, resource, branch, regionCountry, regionTag, null );
     }
     else {
         // NOTE: since this is cached, we know that the JSON.parse will never throw an error here
@@ -221,7 +233,7 @@ exports.fetch = function(req, res){
         var resultObject = findVersion(version, JSONdata);
         //    logger.info(resultObject);
         /*
-         * Now read file from regional template location and "absorb" into national template...
+         * Now read file from national template location and "absorb" into national template...
          *  Like national fetch, this will read form local cache first, then go to github if not found.
          *  Note that when a template is NOT found in github, an empty JSON object is stored to local cache so that we
          *      don't keep trying to get it from github on each resource request (and so we know it should be here now).
@@ -231,21 +243,21 @@ exports.fetch = function(req, res){
         fs.readFile(resourceFile, 'utf8', function(err,data) {
             var regionalResultObject = {};
             if (err || data.length < 1) {
-                // should not have this error, but we already have a national object... just log it...
-                logger.error({message: 'Error reading local region file', file: resourceFile, error: err});
+                // if here, already have national object cached, but may have fetched when looked a a different region
+                // do github call for regional ONLY (no countryTag given tells function this)
+                readFromGitHub( res, version, resource, branch, null, regionTag, resultObject );
             }
             else {
                 // NOTE: since this is cached, we know that the JSON.parse will never throw an error here
                 var JSONdata = JSON.parse(data);
                 regionalResultObject = findVersion(version, JSONdata);
-            }
-
-            // now absorb local into national
-            //logger.info(resultObject);
-            //logger.info(regionalResultObject);
-            deepExtend(resultObject, regionalResultObject);
-            //logger.info(resultObject);
-            res.send(resultObject);
+                // now absorb local into national
+                //logger.info(resultObject);
+                //logger.info(regionalResultObject);
+                deepExtend(resultObject, regionalResultObject);
+                //logger.info(resultObject);
+                res.send(resultObject);
+           }
         });
     }
   });
