@@ -17,37 +17,6 @@ var logger = config.logger;
 */
 
 /*
- *  This function finds the version in the template that is less than or equal to the requested version
- *  NOTE: this is only here for backward compatibility and should go away once we no longer are using the old format...
-*/
-function findVersion (currentVersion, inputJSON ) {
-    if (!inputJSON.versions  )
-    {
-        // new format, no version metadata required...
-        //logger.info('New refactored template format');
-        return inputJSON;
-    }
-    // if here, we must extranct version data...
-    //logger.info('Old template format');
-    var templateJSON = inputJSON.versions;
-    var objectVersion = "0.0.0";
-    var objectResult = templateJSON[0].template;    // grab first (oldest) version in template
-//    logger.info({message: 'Check Versions init', objectVersion: objectVersion, currentVersion: currentVersion});
-    for (var ii in templateJSON) {
-        var version = templateJSON[ii].version;
-//        logger.info('  Located Version: ' + version );
-        // get latest version that is less than or equal to current requested version\
-        // NOTE: currently only handles single digit release numbers since doing alphanumeric comparison!
-        if (version <= currentVersion && version > objectVersion) {
-//            logger.info('  Found better Version: ' + version );
-            objectVersion = version;
-            objectResult = templateJSON[ii].template;
-        }
-    }
-    return (objectResult);
-}
-
-/*
  * This code writes a file to local FS
  */
 function writeToCache( fs, fd, resourceFile, contents )
@@ -129,9 +98,7 @@ function readFromGitHub( res, version, resource, branch, regionCountry, regionTa
     }
     else {
         try {
-            var JSONdata =  JSON.parse(data);
-            regionResultObject = findVersion(version, JSONdata);
-
+            regionResultObject = JSON.parse(data);
             // now that have data, cache it locally!
             writeToLocalCache( resource, branch, regionTag, data );
         }
@@ -156,8 +123,7 @@ function readFromGitHub( res, version, resource, branch, regionCountry, regionTa
         }
         else {
           try {
-            var JSONdata =  JSON.parse(data);
-            nationalResultObject = findVersion(version, JSONdata);
+            nationalResultObject =  JSON.parse(data);
              // now that have data, cache it locally!
             writeToLocalCache( resource, branch, regionCountry, data );
           }
@@ -229,8 +195,7 @@ exports.fetch = function(req, res){
     }
     else {
         // NOTE: since this is cached, we know that the JSON.parse will never throw an error here
-        var JSONdata =  JSON.parse(data);
-        var resultObject = findVersion(version, JSONdata);
+        var resultObject = JSON.parse(data);
         //    logger.info(resultObject);
         /*
          * Now read file from national template location and "absorb" into national template...
@@ -249,8 +214,7 @@ exports.fetch = function(req, res){
             }
             else {
                 // NOTE: since this is cached, we know that the JSON.parse will never throw an error here
-                var JSONdata = JSON.parse(data);
-                regionalResultObject = findVersion(version, JSONdata);
+                regionalResultObject= JSON.parse(data);
                 // now absorb local into national
                 //logger.info(resultObject);
                 //logger.info(regionalResultObject);
