@@ -42,11 +42,21 @@ exports.fetch = function(req, res){
   }
   var version = req.query.version;
   var type = req.query.type;
+  var type2 = '';   // if type jpg or png make sure check both
+  if (type == 'jpg')
+    type2 = 'png';
+  if (type == 'png')
+    type2 = 'jpg';
+  var resource = req.query.resource || 'WDCEP';    // default = WDCEP
   var region_id = req.query.region || 'US11001';
   var datetime = new Date();
-  logger.info({message: "Running docURL fetch", propertyId: propertyID, region_id: region_id});
+  logger.info({message: "Running docURL fetch", propertyId: propertyID, region_id: region_id, resource: resource});
 
   var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = $1 AND marketable = 'TRUE'";
+  if (resource == 'NGKF'){
+    // replace default WDCEP with NGKF table resources
+    selectString = "SELECT id,assets FROM ngkf_sites where property_id = $1";
+  }
   var results = [];
   var rows = 0;
   pg.connect(config.pg.connectionDef, function(err, client, done) {
@@ -66,6 +76,10 @@ exports.fetch = function(req, res){
         var fileCount = 0;
         if (folder !== '') {
           var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
+          if (resource == 'NGKF'){
+            // replace default WDCEP with NGKF table resources
+            fullName = formRegionFolderName(region_id) + '/NGKF/' + folder;
+          }
           logger.info({message:'Located assets', fullName: fullName});
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
@@ -77,7 +91,7 @@ exports.fetch = function(req, res){
             prefix: fullName
           }).on('data', function(key) {
             //logger.info({message: "Data from knoxCopy request", key: key});
-            if (key.slice(-3) == type)
+            if (key.slice(-3) == type || key.slice(-3) == type2)
             {
               files.push(key);
               fileCount++;
@@ -152,9 +166,15 @@ exports.fetchAll = function(req, res){
   }
   var version = req.query.version;
   var type = req.query.type;
+  var type2 = '';   // if type jpg or png make sure check both
+  if (type == 'jpg')
+    type2 = 'png';
+  if (type == 'png')
+    type2 = 'jpg';
+  var resource = req.query.resource || 'WDCEP';    // default = WDCEP
   var region_id = req.query.region || 'US11001';
   var datetime = new Date();
-  logger.info({message: 'Running docURL fetchAll for collection', propertyIDBin: propertyIdBin, region: region_id});
+  logger.info({message: 'Running docURL fetchAll for collection', propertyIDBin: propertyIdBin, region: region_id, resource: resource});
   logger.info(req.query);
 
   var results = [];
@@ -176,6 +196,10 @@ exports.fetchAll = function(req, res){
         var fileCount = 0;
         if (folder !== '') {
           var fullName = formRegionFolderName(region_id) + '/imagesets-/' + folder;
+          if (resource == 'NGKF'){
+            // replace default WDCEP with NGKF table resources
+            fullName = formRegionFolderName(region_id) + '/NGKF/' + folder;
+          }
           logger.info({message: 'Located assets', fullName: fullName});
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
@@ -187,7 +211,7 @@ exports.fetchAll = function(req, res){
             prefix: fullName
           }).on('data', function(key) {
             //logger.info({message: "Data from knoxCopy request", key: key});
-            if (key.slice(-3) == type)
+            if (key.slice(-3) == type || key.slice(-3) == type2)
             {
               files.push(key);
               fileCount++;
@@ -232,6 +256,10 @@ exports.fetchAll = function(req, res){
         var propertyID = propertyIdBin[propIDIndex];
         logger.info("Processing DB request for propertyID: " + propertyID);
         var selectString = "SELECT id,property_id,wdceppage AS assets FROM wdcep_retail where property_id = $1 AND marketable = 'TRUE'";
+        if (resource == 'NGKF'){
+          // replace default WDCEP with NGKF table resources
+          selectString = "SELECT id,assets FROM ngkf_sites where property_id = $1";
+        }
         var query = client.query(selectString, [propertyID]);
 
         // Stream results back one row at a time
