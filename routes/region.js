@@ -101,11 +101,11 @@ exports.locate = function(req, res){
 
 //  var connectionString = 'pg:dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com:5432/DQ';
   var selectString = "Select region_id,region_full_name,region_level from region_tags where " +
-    "ST_Contains(wkb_geometry, ST_SetSRID(ST_MakePoint($1,$2),'4326'));";
+    "ST_Contains(wkb_geometry, ST_SetSRID(ST_MakePoint($1,$2),'4326')) ORDER BY region_level DESC;";
   var results = [];
   var rows = 0;
 
-    pg.connect(config.pg.connectionDef, function(err, client, done) {
+    pg.connect(config.pg.connectionDef, function(err, client, done) {3
       if(err) {
         done();
         var msg='Unable to connect to DQ database';
