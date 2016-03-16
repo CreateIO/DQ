@@ -90,7 +90,7 @@ cat /dev/null > "$errorlog"
 
     do_curl "${dq_host}/DQ/region?lat=38.9041485&long=-77.017094" \
         fetchRegion \
-        '[{"region_id":"US11","region_full_name":"District of Columbia, US","region_level":1},{"region_id":"US",'
+        '[{"region_id":"US11001","region_full_name":"Washington, DC, US","region_level":2},{"region_id":"US11","region_full_name":"District of Columbia,'
 
     do_curl "${dq_host}/DQ/regiondata?regionID=US11001" \
         regiondata \
@@ -118,15 +118,18 @@ cat /dev/null > "$errorlog"
 
     do_curl "${dq_host}/DQ/propCount?regionID=US11001&top=5" \
         pcount1 \
-        '"address":"20005,WASHINGTON, 405 8TH ST NW","lat":-77.0227068504,"long":38.8953269845},{"select_count"'
+        '"address":"20019,WASHINGTON, 3423 - 3439 BENNING RD NE","lat":-76.956205987,"long":38.8960303924},{"select_count":'
 
     do_curl "${dq_host}/DQ/propCount?regionID=US11001&range=3&top=5" \
         pcount2 \
-       '"address":"20006,WASHINGTON, 801 17TH ST NW","lat":-77.0391170481,"long":38.9005373136},{"select_count":'
+       '"address":"20019,WASHINGTON, 3423 - 3439 BENNING RD NE","lat":-76.956205987,"long":38.8960303924},{"select_count"'
 
     do_curl "${dq_host}/DQ/propCount?regionID=US11001&top=5&range=3&envelope=-77.0&envelope=38.899471994&envelope=-76.9873458022&envelope=38.95" \
         pcount3 \
-        '"address":"20002,WASHINGTON, 1334 5TH ST NE","lat":-76.9976492863,"long":38.9096392123},{"select_count"'
+        '"address":"20002,WASHINGTON, 701 H ST NE","lat":-76.9959870112,"long":38.8999314961},{"select_count":'
 
+    do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5" \
+        userstats \
+        '"coverage_month":3,"coverage_year":2016,"total_time":'
 ) | tee sandbox_tests.txt
 exit "$(count_test_failures)"

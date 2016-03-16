@@ -28,6 +28,7 @@ var routes = require('./routes');
 var template = require('./routes/template');
 var userdata = require('./routes/userdata');
 var version = require('./routes/version');
+var stats = require('./routes/stats');
 var githubCache = require('./routes/githubCache');
 
 var app = express();
@@ -77,6 +78,7 @@ app.get('/DQ/regionFind', region.find);
 app.get('/DQ/template', template.fetch);
 app.get('/DQ/userdata', userdata.fetch);
 app.get('/DQ/version', version.fetch);
+app.get('/DQ/stats', stats.fetch);
 
 http.createServer(app).listen(app.get('port'), function(){
   logger.info({process: 'Express DQ server', 
