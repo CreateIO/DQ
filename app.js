@@ -77,6 +77,7 @@ app.get('/DQ/regiondata', region.fetch);
 app.get('/DQ/regionFind', region.find);
 app.get('/DQ/template', template.fetch);
 app.get('/DQ/userdata', userdata.fetch);
+app.get('/DQ/groupdata', template.fetchGroupData)
 app.get('/DQ/version', version.fetch);
 app.get('/DQ/stats', stats.fetch);
 
