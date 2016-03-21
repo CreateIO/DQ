@@ -54,8 +54,10 @@ exports.fetch = function(req, res){
       query.on('end', function() {
           done();
             logger.info({message: 'Number of rows read for stat fetch', count: rows});
-//            logger.debug(results);
-          return res.json(results);
+            logger.info(results);
+          var full_results = '{"count":' + rows + ',"stats":' + JSON.stringify(results) + '}'; // add additional params for count
+          var resultObject = JSON.parse(full_results);    // turn back into object
+          return res.json(resultObject);
       });
 
       query.on('error', function(error) {
