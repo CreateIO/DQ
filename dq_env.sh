@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export VERSION="2.0.2"
+export VERSION="2.1.0"
 
 #postgres dq
 export DB_HOST="dq-test.cvwdsktow3o7.us-east-1.rds.amazonaws.com"
@@ -32,7 +32,7 @@ export GITHUB_OWNER="CreateIO"
 export GITHUB_USER="DiaryQueenRo"
 export GITHUB_TOKEN="4be9d6ff845e754b967169d0ffc8ccd6a641c87f"
 export GITHUB_TEMPLATE_REPO="DQMatchSets"
-export GITHUB_TEMPLATE_BRANCH="new-group-data"
+export GITHUB_TEMPLATE_BRANCH="test"
 #export GITHUB_TEMPLATE_BRANCH="prod"
 export GITHUB_FOLDER=""
 #export GITHUB_FOLDER="DQTemplates/"    #Don't forget trailing "/"   !!!
