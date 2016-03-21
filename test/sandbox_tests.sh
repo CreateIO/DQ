@@ -36,26 +36,29 @@ cat /dev/null > "$errorlog"
 (
     show_header
 
-    # we skip these basic root test -- they aren't hooked up
-    #do_curl "${dq_host}/DQ" root
-    #do_curl "${dq_host}/DQ/" root_dir
-
+    # template tests -- test "normal, branching, merging, regions, groupdata"
     do_curl "${dq_host}/DQ/template?resource=tabs-&branch=master" \
         tabs_generic_novers \
         '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
 
-    do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=master" \
-        tabs_generic \
-        '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
-
-    do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=test" \
+    do_curl "${dq_host}/DQ/template?resource=tabs-&version=1.0.0&branch=dq-sandbox-test" \
         tabs_branch \
         '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
 
+    do_curl "${dq_host}/DQ/groupdata?groupBin=151&groupBin=4&branch=dq-sandbox-test" \
+        groupdata1 \
+        '{"allTheLayers":{"gsa":{"id":47,"displayName":"gsa","mouseoverName":"GSA Leases",'
+
+    do_curl "${dq_host}/DQ/groupdata?groupBin=151&groupBin=4&branch=dq-sandbox-test" \
+        groupdata2 \
+        '"id":7,"name":"Neighborhood","type":"lookup","category":"Property","subcategory":"Property","output":"zillowNbhdName=IN'
+
+    # template tests -- test clearing of cache
     do_curl "${dq_host}/DQ/clearCache?&branch=master&passphrase=test-Access*98765!" \
          clear_cache \
         'Branch ../DQMatchSetsLocal/master cleared'
 
+    # asset tests -- test docCollection, docURL
     do_curl "${dq_host}/DQ/docURL/?version=1.0.0" \
         docurl_generic \
         '[{"fileNames":[],"status":"success","count":0}]'
@@ -116,6 +119,7 @@ cat /dev/null > "$errorlog"
         regionname2 \
         '{"region_id":"US39167","region_full_name":"Washington County, OH, US","region_level":2}'
 
+    # test results from property search count scraper
     do_curl "${dq_host}/DQ/propCount?regionID=US11001&top=5" \
         pcount1 \
         '"address":"20019,WASHINGTON, 3423 - 3439 BENNING RD NE","lat":-76.956205987,"long":38.8960303924},{"select_count":'
@@ -128,6 +132,7 @@ cat /dev/null > "$errorlog"
         pcount3 \
         '"address":"20002,WASHINGTON, 701 H ST NE","lat":-76.9959870112,"long":38.8999314961},{"select_count":'
 
+    # test stats for specific month/year
     do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5" \
         userstats \
         '"coverage_month":3,"coverage_year":2016,"total_time":'

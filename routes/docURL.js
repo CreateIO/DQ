@@ -49,7 +49,6 @@ exports.fetch = function(req, res){
     type2 = 'jpg';
   var resource = req.query.resource || 'WDCEP';    // default = WDCEP
   var region_id = req.query.region || 'US11001';
-  var datetime = new Date();
   logger.info({message: "Running docURL fetch", propertyId: propertyID, region_id: region_id, resource: resource});
 
   var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = $1 AND marketable = 'TRUE'";
@@ -153,6 +152,7 @@ exports.fetch = function(req, res){
     });
    });
 };
+
 /*
  *  SELECT data for a specified userdata/propertyIdBin/region/ID
  *      then return all the file assets for this propertyID collection
@@ -173,7 +173,6 @@ exports.fetchAll = function(req, res){
     type2 = 'jpg';
   var resource = req.query.resource || 'WDCEP';    // default = WDCEP
   var region_id = req.query.region || 'US11001';
-  var datetime = new Date();
   logger.info({message: 'Running docURL fetchAll for collection', propertyIDBin: propertyIdBin, region: region_id, resource: resource});
   logger.info(req.query);
 
