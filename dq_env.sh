@@ -25,7 +25,7 @@ export S3_ASSET_FOLDER="regional_assets"
 
 #aws-sdk topic for github notifications
 export AWS_SNS_TOPIC="arn:aws:sns:us-east-1:249035392509:GithubDQMatchSetsUpdateReport"
-export AWS_SQS_URL="https://sqs.us-east-1.amazonaws.com/249035392509/DQMatchSets-trex2"
+export AWS_SQS_URL="https://sqs.us-east-1.amazonaws.com/249035392509/DQMatchSets-trex3"
 
 #Github
 export GITHUB_OWNER="CreateIO"
