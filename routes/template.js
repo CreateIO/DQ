@@ -8,12 +8,16 @@ var rmdir = require('rmdir');
 var config = require('../config');
 var _ = require('lodash'); //underscore's ok too..
 var extendify = require('extendify');
-var deepExtend = require('deep-extend');
 _.extend = extendify({
   //options
-  arrays : "concat"
+  arrays : "merge",
+  inPlace : false
 })
-
+_.concat = extendify({
+             //options
+             arrays : "concat",
+             inPlace : false
+           })
 var router = express.Router();
 var logger = config.logger;
 
@@ -21,6 +25,12 @@ var logger = config.logger;
     Sample CURL to get to git using API:
     curl -i -uBreighton:password "https://api.github.com/repos/CreateIO/DQMatchSets/contents/US11001/template/tabsNEW-.json?ref=test-regions"
 */
+
+/* utility function to check on NULL json object
+ */
+function isEmptyObject(obj) {
+  return !Object.keys(obj).length;
+}
 
 /*
  * This code writes a file to local FS
@@ -141,22 +151,24 @@ function readFromGitHub( callback, resourceType, resource, branch, regionCountry
         // now "absorb" regional into national...
         //logger.info(nationalResultObject);
         //logger.info(regionResultObject);
-//        _.extend(nationalResultObject, regionResultObject);
-        deepExtend(nationalResultObject, regionResultObject);
+        var mergeObject = _.extend(nationalResultObject, regionResultObject);
+//        var mergeObject = deepExtend(nationalResultObject, regionResultObject);
         //logger.info(resultObject);
         // return the JSON result (or null object if not present in github)
-        callback(nationalResultObject);   // return result to calling party
+//        logger.info(mergeObject);
+        callback(mergeObject);   // return result to calling party
       });
     }
     else{
       // if here, we have already read national data, use what we found
       nationalResourceObject = countryData; // grab what we passed us that have already read from cache
       // now "absorb" regional into national...
-//      _extend(nationalResultObject, regionResultObject);
-      deepExtend(nationalResultObject, regionResultObject);
+      var mergeObject = _extend(nationalResultObject, regionResultObject);
+//      var mergeObject = deepExtend(nationalResultObject, regionResultObject);
       //logger.info(resultObject);
       // return the JSON result (or null object if not present in github)
-      callback(nationalResultObject);   // return result to calling party
+//      logger.info(mergeObject);
+      callback(mergeObject);   // return result to calling party
     }
   });
 };
@@ -184,7 +196,7 @@ exports.fetch = function(req, res){
    */
   function rghResult(result) {
     // send result back to app
-      res.send(result);
+    res.send(result);
   }
 
   /*
@@ -227,10 +239,10 @@ exports.fetch = function(req, res){
                 // now absorb local into national
                 //logger.info(resultObject);
                 //logger.info(regionalResultObject);
-//                _.extend(resultObject, regionalResultObject);
-                deepExtend(resultObject, regionalResultObject);
+                var mergeObject = _.extend(resultObject, regionalResultObject);
+//                var mergeObject = deepExtend(resultObject, regionalResultObject);
                 //logger.info(resultObject);
-                res.send(resultObject);
+                res.send(mergeObject);
            }
         });
     }
@@ -273,7 +285,12 @@ exports.fetchGroupData = function(req, res){
        */
       function rghResult(result) {
         // send result back to app
-          _.extend(resultObject, result); // concat/merge with existing group results
+          if (isEmptyObject(resultObject)) {
+            resultObject = result;
+          }
+          else {
+            resultObject = _.concat(resultObject, result); // concat/merge with existing group results
+          }
           getGroupFiles(++groupIndex);    // get next group template to merge
       }
 
@@ -316,8 +333,13 @@ exports.fetchGroupData = function(req, res){
                     // now absorb local into national
                     //logger.info(groupObject);
                     //logger.info(regionalResultObject);
-                    _.extend(groupObject, regionalResultObject);
-                    _.extend(resultObject, groupObject);    // now absorb local/national of this group with prev. groups
+                    var mergeObject = _.extend(groupObject, regionalResultObject);
+                    if (isEmptyObject(resultObject)) {
+                      resultObject = mergeObject;
+                    }
+                    else {
+                      resultObject = _.concat(resultObject, mergeObject);    // now absorb local/national of this group with prev. groups
+                    }
                     //logger.info(groupObject);
                     getGroupFiles(++groupIndex);    // get next group template to merge
                }
