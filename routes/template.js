@@ -8,7 +8,7 @@ var rmdir = require('rmdir');
 var config = require('../config');
 var _ = require('lodash'); //underscore's ok too..
 var extendify = require('extendify');
-
+var deepExtend = require('deep-extend');
 _.extend = extendify({
   //options
   arrays : "concat"
@@ -141,7 +141,8 @@ function readFromGitHub( callback, resourceType, resource, branch, regionCountry
         // now "absorb" regional into national...
         //logger.info(nationalResultObject);
         //logger.info(regionResultObject);
-        _.extend(nationalResultObject, regionResultObject);
+//        _.extend(nationalResultObject, regionResultObject);
+        deepExtend(nationalResultObject, regionResultObject);
         //logger.info(resultObject);
         // return the JSON result (or null object if not present in github)
         callback(nationalResultObject);   // return result to calling party
@@ -151,7 +152,8 @@ function readFromGitHub( callback, resourceType, resource, branch, regionCountry
       // if here, we have already read national data, use what we found
       nationalResourceObject = countryData; // grab what we passed us that have already read from cache
       // now "absorb" regional into national...
-      _extend(nationalResultObject, regionResultObject);
+//      _extend(nationalResultObject, regionResultObject);
+      deepExtend(nationalResultObject, regionResultObject);
       //logger.info(resultObject);
       // return the JSON result (or null object if not present in github)
       callback(nationalResultObject);   // return result to calling party
@@ -225,7 +227,8 @@ exports.fetch = function(req, res){
                 // now absorb local into national
                 //logger.info(resultObject);
                 //logger.info(regionalResultObject);
-                _.extend(resultObject, regionalResultObject);
+//                _.extend(resultObject, regionalResultObject);
+                deepExtend(resultObject, regionalResultObject);
                 //logger.info(resultObject);
                 res.send(resultObject);
            }
