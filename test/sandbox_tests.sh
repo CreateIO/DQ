@@ -37,6 +37,16 @@ cat /dev/null > "$errorlog"
     show_header
 
     # template tests -- test "normal, branching, merging, regions, groupdata"
+    # grab the tabs from dq-sandbox-test branch to guarantee we have something to clear (so don't get error on clear test)
+    do_curl "${dq_host}/DQ/template?resource=tabs-&branch=dq-sandbox-test" \
+        tabs_generic_novers \
+        '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
+    # next, clear cache of test branch so must always refetch from that repo
+    do_curl "${dq_host}/DQ/clearCache?&branch=dq-sandbox-test&passphrase=test-Access*98765!" \
+     clear_cache \
+    'Branch ../DQMatchSetsLocal/dq-sandbox-test cleared'
+
+    # Note: we run tests twice in some cases to check different code since first time pulls from github, second time from locacl cache
     do_curl "${dq_host}/DQ/template?resource=tabs-&branch=master" \
         tabs_generic_novers \
         '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
@@ -45,10 +55,35 @@ cat /dev/null > "$errorlog"
         tabs_branch \
         '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
 
+    do_curl "${dq_host}/DQ/template?resource=histDist&region=US11001&branch=dq-sandbox-test" \
+        template_full \
+        '{"histDist":[{"objectID":6,"layerGroup":"Corridor","name":'
+
+    do_curl "${dq_host}/DQ/template?resource=histDist&region=US11001&branch=dq-sandbox-test" \
+        template_full2 \
+        '{"histDist":[{"objectID":6,"layerGroup":"Corridor","name":'
+
+    do_curl "${dq_host}/DQ/template?resource=merge_test_1&region=US11001&branch=dq-sandbox-test" \
+        template_merge \
+        '{"bool":"false","value":11001,"a":[{"letter":"i","text":"something"},{"letter":"f","text":"wicked"},{"letter":"y","text":"this"},{"letter":"a","text":"Is The Same"}],"s":"endify"}'
+
+    do_curl "${dq_host}/DQ/template?resource=merge_test_1&region=US11001&branch=dq-sandbox-test" \
+        template_merge2 \
+        '{"bool":"false","value":11001,"a":[{"letter":"i","text":"something"},{"letter":"f","text":"wicked"},{"letter":"y","text":"this"},{"letter":"a","text":"Is The Same"}],"s":"endify"}'
+
+    do_curl "${dq_host}/DQ/groupdata?groupBin=22&groupBin=23&branch=dq-sandbox-test" \
+        group_merge \
+        '{"bool":"false","value":11001,"a":[{"letter":"e","text":"must"},{"letter":"n","text":"see"},{"letter":"d","text":"this"},{"letter":"a","text":"Is The Same"},{"letter":"i","text":"something"},{"letter":"f","text":"wicked"},{"letter":"y","text":"this"},{"letter":"a","text":"Is The Same"}],"s":"endify"}'
+
+    do_curl "${dq_host}/DQ/groupdata?groupBin=22&groupBin=23&branch=dq-sandbox-test" \
+        group_merge2 \
+        '{"bool":"false","value":11001,"a":[{"letter":"e","text":"must"},{"letter":"n","text":"see"},{"letter":"d","text":"this"},{"letter":"a","text":"Is The Same"},{"letter":"i","text":"something"},{"letter":"f","text":"wicked"},{"letter":"y","text":"this"},{"letter":"a","text":"Is The Same"}],"s":"endify"}'
+
     do_curl "${dq_host}/DQ/groupdata?groupBin=151&groupBin=4&branch=dq-sandbox-test" \
         groupdata1 \
         '{"allTheLayers":{"gsa":{"id":47,"displayName":"gsa","mouseoverName":"GSA Leases",'
 
+    # do a second time, and check for a different potential issue as well
     do_curl "${dq_host}/DQ/groupdata?groupBin=151&groupBin=4&branch=dq-sandbox-test" \
         groupdata2 \
         '"id":7,"name":"Neighborhood","type":"lookup","category":"Property","subcategory":"Property","output":"zillowNbhdName=IN'
