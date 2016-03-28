@@ -41,10 +41,11 @@ cat /dev/null > "$errorlog"
     do_curl "${dq_host}/DQ/template?resource=tabs-&branch=dq-sandbox-test" \
         tabs_generic_novers \
         '{"tabs":[{"id":"navProperty","name":"Property","tabs":[{"id":"navOverview","name":"Overview",'
+
     # next, clear cache of test branch so must always refetch from that repo
     do_curl "${dq_host}/DQ/clearCache?&branch=dq-sandbox-test&passphrase=test-Access*98765!" \
-     clear_cache \
-    'Branch ../DQMatchSetsLocal/dq-sandbox-test cleared'
+        clear_cache \
+        'Branch ../DQMatchSetsLocal/dq-sandbox-test cleared'
 
     # Note: we run tests twice in some cases to check different code since first time pulls from github, second time from locacl cache
     do_curl "${dq_host}/DQ/template?resource=tabs-&branch=master" \
@@ -171,5 +172,10 @@ cat /dev/null > "$errorlog"
     do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5" \
         userstats \
         '"coverage_month":3,"coverage_year":2016,"total_time":'
+
+    do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5&format=csv" \
+        userstats_csv \
+        'stat_id,user_id,coverage_month,coverage_year,total_time,max_time,last_visit_date,first_visit_date,total_actions,max_actions,total_searches,max_searches,visit_count'
+
 ) | tee sandbox_tests.txt
 exit "$(count_test_failures)"
