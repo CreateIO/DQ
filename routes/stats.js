@@ -1,6 +1,7 @@
 var express     = require('express');
 var pg          = require('pg');
 var config      = require('../config');
+var converter   = require('json-2-csv');
 
 var router = express.Router();
 var logger = config.logger;
@@ -13,6 +14,7 @@ exports.fetch = function(req, res){
   var year = req.query.year || -1;
   var start_row = req.query.start || 0;
   var return_count = req.query.rows || -1;
+  var return_format = req.query.format || 'json';   // default is normal JSON format return
 
   logger.info({message: 'Running stats fetch', month: month, year: year, start: start_row, rows: return_count});
   logger.debug(req.query);
@@ -55,9 +57,25 @@ exports.fetch = function(req, res){
           done();
             logger.info({message: 'Number of rows read for stat fetch', count: rows});
 //            logger.info(results);
-          var full_results = '{"count":' + rows + ',"stats":' + JSON.stringify(results) + '}'; // add additional params for count
-          var resultObject = JSON.parse(full_results);    // turn back into object
-          return res.json(resultObject);
+          if (return_format == 'csv'){
+            // if here, returning in csv format (stored in json)
+            converter.json2csv(results, function(error, csv){
+              if(error){
+                msg = 'Error converting stat results into csv format';
+                logger.error({ message: msg, err: error});
+                return res.status(500).send(msg);
+              }
+              // if here, have valid results for csv conversion
+              //logger.info(csv);
+              return res.send(csv);
+            });
+          }
+          else {
+            // if here, returning in normal json format
+            var full_results = '{"count":' + rows + ',"stats":' + JSON.stringify(results) + '}'; // add additional params for count
+            var resultObject = JSON.parse(full_results);    // turn back into object
+            return res.json(resultObject);
+          }
       });
 
       query.on('error', function(error) {

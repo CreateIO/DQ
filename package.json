@@ -21,14 +21,15 @@
     "github-api": "git://github.com/CreateIO/github",
     "jade": "^1.9.2",
     "json": "^9.0.3",
+    "json-2-csv": "^2.0.18",
     "knox-copy": "^0.4.0",
+    "lodash": "~4.6.1",
     "method-override": "^2.3.2",
     "mkdirp": "^0.5.1",
     "pg": "^4.3.0",
     "rmdir": "^1.1.0",
     "router": "^1.0.0",
-    "serve-favicon": "^2.2.0",
-    "lodash": "~4.6.1"
+    "serve-favicon": "^2.2.0"
   },
   "devDependencies": {
     "node-inspector": "~0.12.3",
