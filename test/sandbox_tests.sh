@@ -60,6 +60,14 @@ cat /dev/null > "$errorlog"
         template_full \
         '{"histDist":[{"objectID":6,"layerGroup":"Corridor","name":'
 
+    do_curl "${dq_host}/DQ/template?resource=market&region=MD_DC&branch=dq-sandbox-test" \
+        md_cache \
+        '{"name":"DC","abbreviation":"DC","regionTags":[{"name":"District of Columbia","tag":"US11001"}]}'
+
+    do_curl "${dq_host}/DQ/template?resource=market&region=MD_Baltimore&branch=dq-sandbox-test" \
+        md_cachehalf \
+        '{"name":"Baltimore","regionTags":[{"name":"City of Baltimore","tag":"US24510"}]}'
+
     do_curl "${dq_host}/DQ/template?resource=histDist&region=US11001&branch=dq-sandbox-test" \
         template_full2 \
         '{"histDist":[{"objectID":6,"layerGroup":"Corridor","name":'
