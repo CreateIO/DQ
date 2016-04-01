@@ -163,7 +163,7 @@ function readFromGitHub( callback, resourceType, resource, branch, regionCountry
       // if here, we have already read national data, use what we found
       nationalResourceObject = countryData; // grab what we passed us that have already read from cache
       // now "absorb" regional into national...
-      var mergeObject = _extend(nationalResultObject, regionResultObject);
+      var mergeObject = _.extend(nationalResultObject, regionResultObject);
 //      var mergeObject = deepExtend(nationalResultObject, regionResultObject);
       //logger.info(resultObject);
       // return the JSON result (or null object if not present in github)
