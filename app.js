@@ -80,6 +80,7 @@ app.get('/DQ/userdata', userdata.fetch);
 app.get('/DQ/groupdata', template.fetchGroupData)
 app.get('/DQ/version', version.fetch);
 app.get('/DQ/stats', stats.fetch);
+app.get('/DQ/singleStat', stats.single);
 
 http.createServer(app).listen(app.get('port'), function(){
   logger.info({process: 'Express DQ server', 
