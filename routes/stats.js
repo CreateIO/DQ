@@ -17,7 +17,7 @@ exports.fetch = function(req, res){
   var return_format = req.query.format || 'json';   // default is normal JSON format return
 
   logger.info({message: 'Running stats fetch', month: month, year: year, start: start_row, rows: return_count});
-  logger.debug(req.query);
+//  logger.debug(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   // assume we want ALL rows of query returned
@@ -45,7 +45,6 @@ exports.fetch = function(req, res){
       else {
         query = client.query(selectString,[month, year]);
       }
-
       // Stream results back one row at a time
       query.on('row', function(row) {
           results.push(row);
@@ -95,20 +94,20 @@ exports.fetch = function(req, res){
 /*
  *  SELECT a single user's summary stat data from DQ RDBS
  */
-exports.singleStat = function(req, res){
+exports.fetchSingle = function(req, res){
   res.setHeader("Access-Control-Allow-Origin", "*");
   // first make sure have required values...
   if (typeof req.query.user_id === 'undefined' || req.query.user_id === null) {
     logger.error('  Input error: no user_id' );
     return res.status(500).send('Missing user_id');
   }
-  var user = req.query.user_id;
+  var user = '%' + req.query.user_id;
 
-  logger.info({message: 'Running stats fetch', month: month, year: year, start: start_row, rows: return_count});
+  logger.info({message: 'Running stats fetch', user_id: user});
   logger.debug(req.query);
 
   // assume we want ALL rows of query returned
-  var selectString = "SELECT * FROM piwik_user_stats WHERE coverage_month = -1 AND coverage_year = -1 AND user_id = $1";
+  var selectString = "SELECT * FROM piwik_user_stats WHERE coverage_month = -1 AND coverage_year = -1 AND user_id LIKE $1";
   var results = [];
   var rows = 0;
   var msg;
@@ -122,9 +121,7 @@ exports.singleStat = function(req, res){
     }
     else {
       // SQL Query > Select Data
-      var query = "";
-      query = client.query(selectString,[user]);
-
+      var query = client.query(selectString,[user]);
       // Stream results back one row at a time
       query.on('row', function(row) {
           results.push(row);
