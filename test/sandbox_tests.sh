@@ -170,11 +170,11 @@ cat /dev/null > "$errorlog"
 
     do_curl "${dq_host}/DQ/propCount?regionID=US11001&range=3&top=5" \
         pcount2 \
-       '"address":"20019,WASHINGTON, 3423 - 3439 BENNING RD NE","lat":-76.956205987,"long":38.8960303924},{"select_count"'
+       '[{"select_count":'
 
     do_curl "${dq_host}/DQ/propCount?regionID=US11001&top=5&range=3&envelope=-77.0&envelope=38.899471994&envelope=-76.9873458022&envelope=38.95" \
         pcount3 \
-        '"address":"20002,WASHINGTON, 701 H ST NE","lat":-76.9959870112,"long":38.8999314961},{"select_count":'
+        '[{"select_count":'
 
     # test stats for specific month/year
     do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5" \
@@ -184,6 +184,10 @@ cat /dev/null > "$errorlog"
     do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5&format=csv" \
         userstats_csv \
         'stat_id,user_id,coverage_month,coverage_year,total_time,max_time,last_visit_date,first_visit_date,total_actions,max_actions,total_searches,max_searches,visit_count'
+
+    do_curl "${dq_host}/DQ/singleStat?user_id=fechter.marc@gmail.com" \
+        singlestat \
+        'count":1,"stats":[{"stat_id":6,"user_id":"5030-fechter.marc@gmail.com","coverage_month":-1,"coverage_year":-1'
 
 ) | tee sandbox_tests.txt
 exit "$(count_test_failures)"
