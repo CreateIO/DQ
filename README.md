@@ -57,10 +57,21 @@ Edit so that it has these lines:
 and restart lighttpd
 	sudo service lighttpd restart
 
-## To run in foreground on ubuntu
+## To upgrade the server to a new version or to revert to an old version
+    --disconnect server you are updating from the AWS EC2 load balancer for dq-test or dq-prod
     cd /data/DQ/DQ
-    source ./dq_env.sh
-	npm start
+    ./run_dq.sh
+    git stash               # dq_env.sh is different on each server
+    git co branch-you-want  #NOTE: this step is normally not necessary unless you wish to pull from something other than 'master'
+    git pull
+    npm update              #typically not required unless changes have been made to npm modules
+    vim dq_env.sh           #edit dq_env.sh to insure settings correct for server instance...  There are two settings that
+                            #    might need to be altered:
+                            #     DB_HOST= to either dq-test... or dq-prod...
+                            #     AWS_SQS_URL= to ...-trexN (where N = the instance you are updating)
+    ./run_dq.sh
+    test/sandbox_tests.sh   # Runs tests on all dq endpoints.  You should not see any errors
+    --reconnect erver you just updating from the AWS EC2 load balancer for dq-test or dq-prod
 
 ## To run in the background on ubuntu (NOT in supervisor mode so can kill cleanly if needed)
     cd /data/DQ/DQ
