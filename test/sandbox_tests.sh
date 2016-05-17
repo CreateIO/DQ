@@ -181,13 +181,18 @@ cat /dev/null > "$errorlog"
         userstats \
         '"coverage_month":3,"coverage_year":2016,"total_time":'
 
+    # test stats for specific month/year/filter
+    do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5&filter=gmail" \
+        userstatsfilter \
+        '"user_id":"4820-alexanderpwolff@gmail.com","coverage_month":3,"coverage_year":2016,:'
+
     do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5&format=csv" \
         userstats_csv \
         'stat_id,user_id,coverage_month,coverage_year,total_time,max_time,last_visit_date,first_visit_date,total_actions,max_actions,total_searches,max_searches,visit_count'
 
     do_curl "${dq_host}/DQ/singleStat?user_id=fechter.marc@gmail.com" \
         singlestat \
-        'count":1,"stats":[{"stat_id":6,"user_id":"5030-fechter.marc@gmail.com","coverage_month":-1,"coverage_year":-1'
+        '"user_id":"5030-fechter.marc@gmail.com","coverage_month":-1,"coverage_year":-1'
 
 ) | tee sandbox_tests.txt
 exit "$(count_test_failures)"
