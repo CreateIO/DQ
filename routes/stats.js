@@ -12,18 +12,29 @@ var logger = config.logger;
 exports.fetch = function(req, res){
   var month = req.query.month || -1;  // default to summary stats
   var year = req.query.year || -1;
+  var filter = req.query.filter;
   var start_row = req.query.start || 0;
   var return_count = req.query.rows || -1;
   var return_format = req.query.format || 'json';   // default is normal JSON format return
 
-  logger.info({message: 'Running stats fetch', month: month, year: year, start: start_row, rows: return_count});
+  logger.info({message: 'Running stats fetch', month: month, year: year, filter: filter, start: start_row, rows: return_count});
 //  logger.debug(req.query);
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   // assume we want ALL rows of query returned
-  var selectString = "SELECT * FROM piwik_user_stats WHERE coverage_month = $1 AND coverage_year = $2 ORDER BY total_actions DESC";
+  var selectString = "SELECT * FROM piwik_user_stats WHERE coverage_month = $1 AND coverage_year = $2"
+  var filterString = '';
+  if (req.query.filter) {
+    var filterString = '%'+filter+'%';
+    selectString += " AND user_id LIKE $3"
+  }
+  selectString += " ORDER BY total_actions DESC";
+
   if (return_count != -1){
-    selectString = "SELECT * FROM piwik_user_stats WHERE coverage_month = $1 AND coverage_year = $2 ORDER BY total_actions DESC LIMIT $3 OFFSET $4";
+    if (req.query.filter)
+      selectString += " LIMIT $4 OFFSET $5";
+    else
+      selectString += " LIMIT $3 OFFSET $4";
   }
   var results = [];
   var rows = 0;
@@ -40,10 +51,16 @@ exports.fetch = function(req, res){
       // SQL Query > Select Data
       var query = "";
       if (return_count != -1){
-        query = client.query(selectString,[month, year, return_count, start_row]);
+        if (req.query.filter)
+          query = client.query(selectString,[month, year, filterString, return_count, start_row]);
+        else
+          query = client.query(selectString,[month, year, return_count, start_row]);
       }
       else {
-        query = client.query(selectString,[month, year]);
+        if (req.query.filter)
+          query = client.query(selectString,[month, year, filterString]);
+        else
+          query = client.query(selectString,[month, year]);
       }
       // Stream results back one row at a time
       query.on('row', function(row) {
