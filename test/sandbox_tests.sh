@@ -184,7 +184,7 @@ cat /dev/null > "$errorlog"
     # test stats for specific month/year/filter
     do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5&filter=gmail" \
         userstatsfilter \
-        '"user_id":"4820-alexanderpwolff@gmail.com","coverage_month":3,"coverage_year":2016,:'
+        '"user_id":"4820-alexanderpwolff@gmail.com","coverage_month":3,"coverage_year":2016,'
 
     do_curl "${dq_host}/DQ/stats?month=3&year=2016&start=0&rows=5&format=csv" \
         userstats_csv \
