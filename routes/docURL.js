@@ -47,14 +47,18 @@ exports.fetch = function(req, res){
     type2 = 'png';
   if (type == 'png')
     type2 = 'jpg';
-  var resource = req.query.resource || 'WDCEP';    // default = WDCEP
-  var region_id = req.query.region || 'US11001';
+  var resource = req.query.resource || 'WDCEP';     // default = WDCEP
+  var region_id = req.query.region || 'US11001';    // default = DC
   logger.info({message: "Running docURL fetch", propertyId: propertyID, region_id: region_id, resource: resource});
 
   var selectString = "SELECT id,wdceppage AS assets FROM wdcep_retail where property_id = $1 AND marketable = 'TRUE'";
   if (resource == 'NGKF'){
     // replace default WDCEP with NGKF table resources
     selectString = "SELECT id,assets FROM ngkf_sites where property_id = $1";
+  }
+  else if (resource == 'array'){
+    // replace default WDCEP with ARRAY table resources
+    selectString = "SELECT id,assets FROM array_sites where property_id = $1";
   }
   var results = [];
   var rows = 0;
@@ -78,6 +82,9 @@ exports.fetch = function(req, res){
           if (resource == 'NGKF'){
             // replace default WDCEP with NGKF table resources
             fullName = formRegionFolderName(region_id) + '/NGKF/' + folder;
+          }
+          else if (resource == 'array'){
+            fullName = formRegionFolderName(region_id) + '/array/' + folder;
           }
           logger.info({message:'Located assets', fullName: fullName});
           var client = knoxCopy.createClient({
@@ -199,6 +206,9 @@ exports.fetchAll = function(req, res){
             // replace default WDCEP with NGKF table resources
             fullName = formRegionFolderName(region_id) + '/NGKF/' + folder;
           }
+          else if (resource == 'array'){
+            fullName = formRegionFolderName(region_id) + '/array/' + folder;
+          }
           logger.info({message: 'Located assets', fullName: fullName});
           var client = knoxCopy.createClient({
             key: process.env.KC_KEY,
@@ -258,6 +268,10 @@ exports.fetchAll = function(req, res){
         if (resource == 'NGKF'){
           // replace default WDCEP with NGKF table resources
           selectString = "SELECT id,assets FROM ngkf_sites where property_id = $1";
+        }
+        else if (resource == 'array'){
+          // replace default WDCEP with ARRAY table resources
+          selectString = "SELECT id,assets FROM array_sites where property_id = $1";
         }
         var query = client.query(selectString, [propertyID]);
 
