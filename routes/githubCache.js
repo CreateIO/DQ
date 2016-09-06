@@ -69,10 +69,15 @@ exports.pollSQS = function(){
             // Get the first message (should be the only one since we said to only get one above)
             var message = data.Messages[0],
                 body = JSON.parse(message.Body);
+            logger.error(body);
             // Now this is where you'd do something with this message
             var content = JSON.parse(body.Message);
             //logger.info("CONTENT:::")
             //logger.info(content);
+
+            // TODO AHCK HACK
+            // if the message is too big it will be an error
+            if ('ref' in content) {
             var branch = content.ref.substring(11);    // skip over "refs/heads/"
             logger.info("Branch: " + branch + " has been modified, clearing local cache!");
               var branchFolder = '../' + process.env.LOCAL_CACHE  + '/' + branch;
@@ -89,6 +94,9 @@ exports.pollSQS = function(){
 //            logger.info(body.Message.ref);
 //            logger.info(body.ref);
             // Clean up after yourself... delete this message from the queue, so it's not executed again
+            } else {
+              logger.error("skipping message with id "+ message);
+            }
             removeFromQueue(message);  // We'll do this in a second
          }
       }
